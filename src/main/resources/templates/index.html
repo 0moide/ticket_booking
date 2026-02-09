@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кинотеатр - Афиша</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f1e;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00b4d8;
+            text-decoration: none;
+        }
+        
+        .tagline {
+            color: #90e0ef;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .main-title {
+            text-align: center;
+            margin: 40px 0 30px;
+            font-size: 36px;
+            color: #ffffff;
+            position: relative;
+        }
+        
+        .main-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: #00b4d8;
+            margin: 10px auto 0;
+        }
+        
+        .films-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .film-card {
+            background: #1a1a2e;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            border: 1px solid #2d3047;
+        }
+        
+        .film-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,180,216,0.2);
+            border-color: #00b4d8;
+        }
+        
+        .film-poster {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .film-info {
+            padding: 20px;
+        }
+        
+        .film-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .film-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #90e0ef;
+        }
+        
+        .film-genre {
+            background: rgba(0, 180, 216, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+            color: #00b4d8;
+        }
+        
+        .film-description {
+            color: #b8b8d1;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #0096c7 0%, #005f8a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #00b4d8;
+            color: #00b4d8;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 180, 216, 0.1);
+        }
+        
+        .age-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e63946;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .card-header {
+            position: relative;
+        }
+        
+        .footer {
+            background: #1a1a2e;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 1px solid #2d3047;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links a {
+            color: #90e0ef;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        
+        .footer-links a:hover {
+            color: #00b4d8;
+        }
+        
+        .copyright {
+            color: #6d6d8a;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .films-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-links {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">🎬 Кинотеатр CINEMA</a>
+            <div class="tagline">Лучшие фильмы на большом экране</div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <h1 class="main-title">Сейчас в кино</h1>
+        
+        <div class="films-grid">
+            <div th:each="film : ${films}" class="film-card">
+                <div class="card-header">
+                    <img th:src="${film.posterUrl}" th:alt="${film.title}" class="film-poster">
+                    <div class="age-badge">[[${film.minAge}]]+</div>
+                </div>
+                <div class="film-info">
+                    <h3 class="film-title" th:text="${film.title}">Название фильма</h3>
+                    <div class="film-meta">
+                        <span>[[${film.duration}]] мин</span>
+                        <span class="film-genre" th:text="${film.genre}">Жанр</span>
+                    </div>
+                    <p class="film-description" th:text="${film.description}">Описание фильма</p>
+                    <a th:href="@{/film/{id}(id=${film.id})}" class="btn">Выбрать сеанс</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="copyright">
+                    © 2024 Кинотеатр CINEMA. Все права защищены.
+                </div>
+                <div class="footer-links">
+                    <a href="#">О кинотеатре</a>
+                    <a href="#">Правила</a>
+                    <a href="#">Контакты</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
