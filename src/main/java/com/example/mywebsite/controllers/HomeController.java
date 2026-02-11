@@ -1,5 +1,7 @@
-package com.example.mywebsite;
+package com.example.mywebsite.controllers;
 
+import com.example.mywebsite.entities.Film;
+import com.example.mywebsite.services.FilmService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,5 +30,20 @@ public class HomeController {
         }
         model.addAttribute("film", film);
         return "film-details";
+    }
+    
+    @GetMapping("/session/{filmId}/{sessionIndex}")
+    public String seatingPage(@PathVariable Long filmId, 
+                             @PathVariable int sessionIndex,
+                             Model model) {
+        Film film = filmService.getFilmById(filmId);
+        if (film == null || sessionIndex >= film.getSessions().size()) {
+            return "redirect:/";
+        }
+        model.addAttribute("film", film);
+        // ИЗМЕНЕНИЕ: используем другое имя вместо "session"
+        model.addAttribute("filmSession", film.getSessions().get(sessionIndex));
+        model.addAttribute("sessionIndex", sessionIndex);
+        return "seating";
     }
 }
