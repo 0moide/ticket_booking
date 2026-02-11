@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${film.title} + ' - выбор мест'">Выбор мест</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f1e;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00b4d8;
+            text-decoration: none;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #90e0ef;
+            text-decoration: none;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .back-link:hover {
+            color: #00b4d8;
+        }
+        
+        .session-info {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 1px solid #2d3047;
+        }
+        
+        .session-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #00b4d8;
+        }
+        
+        .hall-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .hall-badge {
+            background: rgba(0, 180, 216, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #00b4d8;
+            font-size: 16px;
+        }
+        
+        .screen {
+            background: linear-gradient(135deg, #2d3047 0%, #1a1a2e 100%);
+            height: 80px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            font-size: 18px;
+            color: #90e0ef;
+            letter-spacing: 4px;
+            border-bottom: 2px solid #00b4d8;
+        }
+        
+        .seating-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            overflow-x: auto;
+            padding: 20px;
+            background: #1a1a2e;
+            border-radius: 12px;
+        }
+        
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .row-label {
+            min-width: 50px;
+            color: #90e0ef;
+            font-weight: bold;
+        }
+        
+        .seat {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            color: white;
+        }
+        
+        .seat.available {
+            background: linear-gradient(135deg, #2d3047 0%, #1e1e2e 100%);
+            border: 1px solid #4a4e69;
+            color: #b8b8d1;
+        }
+        
+        .seat.available:hover {
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            border-color: #00b4d8;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+        
+        .seat.reserved {
+            background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);
+            border: 1px solid #ffb703;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .seat.sold {
+            background: linear-gradient(135deg, #e63946 0%, #c41e3a 100%);
+            border: 1px solid #e63946;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .seat.unavailable {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: 1px solid #6c757d;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .seat.selected {
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            border: 2px solid #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+        }
+        
+        .legend {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+        }
+        
+        .booking-form {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 1px solid #2d3047;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #90e0ef;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: #2d3047;
+            border: 1px solid #4a4e69;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #00b4d8;
+            box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.2);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #0096c7 0%, #005f8a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #00b4d8;
+            color: #00b4d8;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 180, 216, 0.1);
+        }
+        
+        .selected-seats-info {
+            background: rgba(0, 180, 216, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #00b4d8;
+        }
+        
+        .footer {
+            background: #1a1a2e;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 1px solid #2d3047;
+            text-align: center;
+            color: #6d6d8a;
+        }
+        
+        @media (max-width: 768px) {
+            .seat {
+                width: 35px;
+                height: 35px;
+                font-size: 12px;
+            }
+            
+            .row-label {
+                min-width: 35px;
+            }
+        }
+    </style>
+</head>
+<body th:data-film-id="${film.id}" th:data-session-index="${sessionIndex}">
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">🎬 Кинотеатр CINEMA</a>
+            <a th:href="@{/film/{id}(id=${film.id})}" class="back-link">← Вернуться к фильму</a>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="session-info">
+            <h2 class="session-title">
+                <span th:text="${film.title}">Название фильма</span>
+            </h2>
+            <div class="hall-info">
+                <span class="hall-badge">
+                    🎬 Зал № <span th:text="${filmSession.hallNumber}">1</span>
+                </span>
+                <span class="hall-badge">
+                    ⏰ <span th:text="${#temporals.format(filmSession.time, 'dd.MM.yyyy HH:mm')}">11.02.2026 15:30</span>
+                </span>
+                <span class="hall-badge">
+                    🪑 Рядов: <span th:text="${filmSession.booking.rows}">5</span>, мест в ряду: <span th:text="${filmSession.booking.seatsPerRow}">10</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="screen">
+            🎬 ЭКРАН 🎬
+        </div>
+        
+        <div class="seating-chart" id="seating-chart">
+            <!-- Схема зала будет загружена через JavaScript -->
+            <div style="text-align: center; padding: 50px;">
+                <div style="color: #00b4d8; margin-bottom: 20px;">Загрузка схемы зала...</div>
+                <div style="width: 50px; height: 50px; border: 3px solid #00b4d8; border-top-color: transparent; border-radius: 50%; margin: 0 auto; animation: spin 1s linear infinite;"></div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #2d3047 0%, #1e1e2e 100%); border: 1px solid #4a4e69;"></div>
+                <span>Свободно</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);"></div>
+                <span>Выбрано</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);"></div>
+                <span>Забронировано</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #e63946 0%, #c41e3a 100%);"></div>
+                <span>Продано</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);"></div>
+                <span>Недоступно</span>
+            </div>
+        </div>
+        
+        <div class="booking-form" id="booking-form" style="display: none;">
+            <h3 style="color: #00b4d8; margin-bottom: 20px;">Оформление бронирования</h3>
+            
+            <div class="selected-seats-info" id="selected-seats-info">
+                <!-- Информация о выбранных местах будет здесь -->
+            </div>
+            
+            <div class="form-group">
+                <label for="userName">Ваше имя *</label>
+                <input type="text" class="form-control" id="userName" placeholder="Введите ваше имя" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="userEmail">Email (для подтверждения)</label>
+                <input type="email" class="form-control" id="userEmail" placeholder="example@mail.com">
+            </div>
+            
+            <button class="btn" onclick="confirmBooking()">✅ Подтвердить бронирование</button>
+            <button class="btn btn-secondary" onclick="clearSelection()">✖ Очистить выбор</button>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            Выберите удобные места и подтвердите бронирование
+        </div>
+    </footer>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <script>
+        // Данные от сервера через data-атрибуты
+        let filmId = document.body.dataset.filmId;
+        let sessionIndex = document.body.dataset.sessionIndex;
+        let selectedSeats = new Set();
+        let seatsData = null;
+        
+        console.log("Film ID from data:", filmId);
+        console.log("Session Index from data:", sessionIndex);
+        
+        // Конвертируем в числа
+        if (filmId) filmId = parseInt(filmId);
+        if (sessionIndex) sessionIndex = parseInt(sessionIndex);
+        
+        // Загрузка схемы зала при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            if (filmId && !isNaN(filmId) && sessionIndex !== null && !isNaN(sessionIndex)) {
+                loadSeatingChart();
+            } else {
+                console.error('Ошибка: filmId или sessionIndex не определены корректно');
+                document.getElementById('seating-chart').innerHTML = 
+                    '<div style="text-align: center; padding: 50px; color: #e63946;">' +
+                    '❌ Ошибка загрузки данных. Пожалуйста, вернитесь на страницу фильма и попробуйте снова.</div>';
+            }
+        });
+        
+        function loadSeatingChart() {
+            fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats`)
+                .then(response => response.json())
+                .then(data => {
+                    seatsData = data;
+                    renderSeatingChart(data);
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки схемы зала:', error);
+                    document.getElementById('seating-chart').innerHTML = 
+                        '<div style="text-align: center; padding: 50px; color: #e63946;">' +
+                        '❌ Ошибка загрузки схемы зала. Пожалуйста, обновите страницу.</div>';
+                });
+        }
+        
+        function renderSeatingChart(data) {
+            const chart = document.getElementById('seating-chart');
+            chart.innerHTML = '';
+            
+            const seats = data.seats;
+            const rows = data.rows;
+            const seatsPerRow = data.seatsPerRow;
+            
+            for (let row = 0; row < rows; row++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'row-label';
+                rowLabel.textContent = `Ряд ${row + 1}`;
+                rowDiv.appendChild(rowLabel);
+                
+                for (let seat = 0; seat < seatsPerRow; seat++) {
+                    const seatIndex = row * seatsPerRow + seat;
+                    const seatData = seats[seatIndex];
+                    const seatButton = document.createElement('button');
+                    seatButton.className = `seat ${getSeatStatusClass(seatData.status)}`;
+                    seatButton.textContent = seat + 1;
+                    seatButton.dataset.seatId = seatData.id;
+                    seatButton.dataset.row = seatData.row;
+                    seatButton.dataset.number = seatData.number;
+                    seatButton.dataset.status = seatData.status;
+                    
+                    if (seatData.status === 'Available') {
+                        seatButton.onclick = () => toggleSeatSelection(seatButton);
+                    }
+                    
+                    rowDiv.appendChild(seatButton);
+                }
+                
+                chart.appendChild(rowDiv);
+            }
+        }
+        
+        function getSeatStatusClass(status) {
+            switch(status) {
+                case 'Available': return 'available';
+                case 'Reserved': return 'reserved';
+                case 'Sold': return 'sold';
+                case 'Unavailable': return 'unavailable';
+                default: return 'available';
+            }
+        }
+        
+        function toggleSeatSelection(seatButton) {
+            const seatId = seatButton.dataset.seatId;
+            const row = seatButton.dataset.row;
+            const number = seatButton.dataset.number;
+            
+            if (selectedSeats.has(seatId)) {
+                selectedSeats.delete(seatId);
+                seatButton.classList.remove('selected');
+            } else {
+                selectedSeats.add(seatId);
+                seatButton.classList.add('selected');
+            }
+            
+            updateBookingForm();
+        }
+        
+        function updateBookingForm() {
+            const form = document.getElementById('booking-form');
+            const info = document.getElementById('selected-seats-info');
+            
+            if (selectedSeats.size > 0) {
+                form.style.display = 'block';
+                
+                let seatsList = [];
+                selectedSeats.forEach(seatId => {
+                    const seat = seatsData.seats[seatId];
+                    seatsList.push(`${seat.row} ряд, ${seat.number} место`);
+                });
+                
+                info.innerHTML = `
+                    <h4 style="color: #00b4d8; margin-bottom: 10px;">Выбранные места:</h4>
+                    <p style="color: white; font-size: 16px;">${seatsList.join(' • ')}</p>
+                    <p style="color: #90e0ef; margin-top: 10px;">Всего мест: ${selectedSeats.size}</p>
+                `;
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        
+        function clearSelection() {
+            document.querySelectorAll('.seat.selected').forEach(seat => {
+                seat.classList.remove('selected');
+            });
+            selectedSeats.clear();
+            updateBookingForm();
+        }
+        
+        function confirmBooking() {
+            const userName = document.getElementById('userName').value.trim();
+            
+            if (selectedSeats.size === 0) {
+                alert('Пожалуйста, выберите места для бронирования');
+                return;
+            }
+            
+            if (!userName) {
+                alert('Пожалуйста, введите ваше имя');
+                return;
+            }
+            
+            // Бронируем каждое выбранное место
+            const promises = Array.from(selectedSeats).map(seatId => {
+                return fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats/${seatId}/reserve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userName: userName })
+                })
+                .then(response => response.json());
+            });
+            
+            Promise.all(promises)
+                .then(results => {
+                    const allSuccess = results.every(r => r.success);
+                    if (allSuccess) {
+                        alert('✅ Бронирование успешно оформлено!');
+                        clearSelection();
+                        loadSeatingChart(); // Перезагружаем схему зала
+                    } else {
+                        alert('❌ Некоторые места уже забронированы. Пожалуйста, обновите страницу.');
+                        loadSeatingChart();
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка бронирования:', error);
+                    alert('❌ Произошла ошибка при бронировании');
+                });
+        }
+    </script>
+</body>
+</html>
