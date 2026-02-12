@@ -1,6 +1,8 @@
 package com.example.mywebsite.entities;
 
 import java.util.ArrayList;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.Version;
 
 public class Booking {
     public class BookedSeat {
@@ -9,6 +11,8 @@ public class Booking {
         private SeatStatus status;
         private String name = null;
         private int id;
+        @Version
+        private int version;
 
         public BookedSeat(int row, int number, int id) {
             this.row = row;
@@ -62,6 +66,7 @@ public class Booking {
         return seatsPerRow;
     }
     
+    @Transactional
     public boolean reserveSeat(int seatId, String userName) {
         if (seatId >= 0 && seatId < bookedSeats.size()) {
             BookedSeat seat = bookedSeats.get(seatId);
