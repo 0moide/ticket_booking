@@ -15,13 +15,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class ApiController {
-    
-    // private final FilmService filmService;
 
     private final DatabaseService databaseService;
     
     public ApiController(DatabaseService databaseService) {
-        // this.filmService = filmService;
         this.databaseService = databaseService;
     }
     
@@ -53,7 +50,7 @@ public class ApiController {
     @PostMapping("/films/{filmId}/sessions/{sessionIndex}/seats/{seatNumber}/reserve")
     public ResponseEntity<?> reserveSeat(@PathVariable Long filmId,
                                         @PathVariable int sessionIndex,
-                                        @PathVariable int seatNumber,  // теперь seatNumber
+                                        @PathVariable int seatNumber,
                                         @RequestBody Map<String, String> request) {
         String userName = request.get("userName");
         System.out.println("номер места = " + seatNumber);

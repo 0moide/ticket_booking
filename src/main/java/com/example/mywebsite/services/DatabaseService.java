@@ -83,7 +83,6 @@ public class DatabaseService {
         booking1.setSession(session1);
         session1.setBooking(booking1);
         
-        // Сохраняем сессию (каскадно сохранится booking)
         sessionRepository.save(session1);
         
         // Сохраняем места для booking1

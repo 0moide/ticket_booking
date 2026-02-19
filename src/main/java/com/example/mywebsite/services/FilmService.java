@@ -18,7 +18,6 @@ public class FilmService {
     private Long currentBookingId = 1L;
     
     public FilmService() {
-        // Инициализируем тестовыми данными
         initializeFilms();
         addSessions();
     }
