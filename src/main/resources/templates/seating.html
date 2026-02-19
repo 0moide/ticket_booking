@@ -424,6 +424,7 @@
             fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log("Seats data from API:", data);
                     seatsData = data;
                     renderSeatingChart(data);
                 })
@@ -436,12 +437,32 @@
         }
         
         function renderSeatingChart(data) {
+            console.log("renderSeatingChart called with data:", data);
+            
+            if (!data || !data.seats || data.seats.length === 0) {
+                console.error("No seats data received!");
+                document.getElementById('seating-chart').innerHTML = 
+                    '<div style="text-align: center; padding: 50px; color: #e63946;">' +
+                    '❌ Нет данных о местах</div>';
+                return;
+            }
+            
             const chart = document.getElementById('seating-chart');
             chart.innerHTML = '';
             
-            const seats = data.seats;
+            // Копируем массив мест и сортируем по ряду и номеру
+            const sortedSeats = [...data.seats].sort((a, b) => {
+                if (a.row !== b.row) {
+                    return a.row - b.row;  // сортировка по ряду
+                }
+                return a.number - b.number;  // сортировка по месту в ряду
+            });
+            
             const rows = data.rows;
             const seatsPerRow = data.seatsPerRow;
+            
+            console.log(`Rows: ${rows}, Seats per row: ${seatsPerRow}, Total seats: ${sortedSeats.length}`);
+            console.log("First few sorted seats:", sortedSeats.slice(0, 5));
             
             for (let row = 0; row < rows; row++) {
                 const rowDiv = document.createElement('div');
@@ -452,17 +473,29 @@
                 rowLabel.textContent = `Ряд ${row + 1}`;
                 rowDiv.appendChild(rowLabel);
                 
+                // Для каждого места в ряду
                 for (let seat = 0; seat < seatsPerRow; seat++) {
+                    // Вычисляем индекс в отсортированном массиве
                     const seatIndex = row * seatsPerRow + seat;
-                    const seatData = seats[seatIndex];
+                    const seatData = sortedSeats[seatIndex];
+                    
+                    if (!seatData) {
+                        console.error(`No seat data at index ${seatIndex}`);
+                        continue;
+                    }
+                    
                     const seatButton = document.createElement('button');
                     seatButton.className = `seat ${getSeatStatusClass(seatData.status)}`;
                     seatButton.textContent = seat + 1;
-                    seatButton.dataset.seatId = seatData.id;
+                    
+                    // Устанавливаем data-атрибуты
+                    seatButton.dataset.seatNumber = seatData.seatNumber;
                     seatButton.dataset.row = seatData.row;
                     seatButton.dataset.number = seatData.number;
                     seatButton.dataset.status = seatData.status;
+                    seatButton.dataset.id = seatData.id;
                     
+                    // Добавляем обработчик только для свободных мест
                     if (seatData.status === 'Available') {
                         seatButton.onclick = () => toggleSeatSelection(seatButton);
                     }
@@ -472,6 +505,8 @@
                 
                 chart.appendChild(rowDiv);
             }
+            
+            console.log("Seating chart rendered successfully");
         }
         
         function getSeatStatusClass(status) {
@@ -485,32 +520,37 @@
         }
         
         function toggleSeatSelection(seatButton) {
-            const seatId = seatButton.dataset.seatId;
-            const row = seatButton.dataset.row;
-            const number = seatButton.dataset.number;
-            
-            if (selectedSeats.has(seatId)) {
-                selectedSeats.delete(seatId);
-                seatButton.classList.remove('selected');
-            } else {
-                selectedSeats.add(seatId);
-                seatButton.classList.add('selected');
-            }
-            
-            updateBookingForm();
+        const seatNumber = seatButton.dataset.seatNumber;
+        
+        if (!seatNumber) {
+            console.error('seatNumber не определен');
+            return;
         }
+        
+        if (selectedSeats.has(seatNumber)) {
+            selectedSeats.delete(seatNumber);
+            seatButton.classList.remove('selected');
+        } else {
+            selectedSeats.add(seatNumber);
+            seatButton.classList.add('selected');
+        }
+        
+        updateBookingForm();
+    }
         
         function updateBookingForm() {
             const form = document.getElementById('booking-form');
             const info = document.getElementById('selected-seats-info');
             
-            if (selectedSeats.size > 0) {
+            if (selectedSeats.size > 0 && seatsData && seatsData.seats) {
                 form.style.display = 'block';
                 
                 let seatsList = [];
                 selectedSeats.forEach(seatId => {
                     const seat = seatsData.seats[seatId];
-                    seatsList.push(`${seat.row} ряд, ${seat.number} место`);
+                    if (seat) {  // проверка, что место существует
+                        seatsList.push(`${seat.row} ряд, ${seat.number} место`);
+                    }
                 });
                 
                 info.innerHTML = `
@@ -532,47 +572,46 @@
         }
         
         function confirmBooking() {
-            const userName = document.getElementById('userName').value.trim();
-            
-            if (selectedSeats.size === 0) {
-                alert('Пожалуйста, выберите места для бронирования');
-                return;
-            }
-            
-            if (!userName) {
-                alert('Пожалуйста, введите ваше имя');
-                return;
-            }
-            
-            // Бронируем каждое выбранное место
-            const promises = Array.from(selectedSeats).map(seatId => {
-                return fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats/${seatId}/reserve`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ userName: userName })
-                })
-                .then(response => response.json());
-            });
-            
-            Promise.all(promises)
-                .then(results => {
-                    const allSuccess = results.every(r => r.success);
-                    if (allSuccess) {
-                        alert('✅ Бронирование успешно оформлено!');
-                        clearSelection();
-                        loadSeatingChart(); // Перезагружаем схему зала
-                    } else {
-                        alert('❌ Некоторые места уже забронированы. Пожалуйста, обновите страницу.');
-                        loadSeatingChart();
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка бронирования:', error);
-                    alert('❌ Произошла ошибка при бронировании');
-                });
+        const userName = document.getElementById('userName').value.trim();
+        
+        if (selectedSeats.size === 0) {
+            alert('Пожалуйста, выберите места для бронирования');
+            return;
         }
+        
+        if (!userName) {
+            alert('Пожалуйста, введите ваше имя');
+            return;
+        }
+        
+        const promises = Array.from(selectedSeats).map(seatNumber => {  // seatNumber, не seatId
+            return fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats/${seatNumber}/reserve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userName: userName })
+            })
+            .then(response => response.json());
+        });
+        
+        Promise.all(promises)
+            .then(results => {
+                const allSuccess = results.every(r => r.success);
+                if (allSuccess) {
+                    alert('✅ Бронирование успешно оформлено!');
+                    clearSelection();
+                    loadSeatingChart();
+                } else {
+                    alert('❌ Некоторые места уже забронированы. Пожалуйста, обновите страницу.');
+                    loadSeatingChart();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка бронирования:', error);
+                alert('❌ Произошла ошибка при бронировании');
+            });
+    }
     </script>
 </body>
 </html>
