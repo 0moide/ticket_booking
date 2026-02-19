@@ -1,19 +1,28 @@
 package com.example.mywebsite.entities;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Film {
+    @Id
     private Long id;
     private String title;
     private String description;
     private String genre;
-    private int duration; // в минутах
-    private String posterFileName; // имя файла с постером
-    private int minAge; // минимальный возраст
-    private ArrayList<Session> sessions;
-    
-    // Конструкторы
-    public Film() {}
+    private int duration;
+    private String posterFileName;
+    private int minAge;
+
+    @OneToMany(mappedBy = "film", cascade = CascadeType.ALL)
+    private List<Session> sessions = new ArrayList<>();
+
+    protected Film() {}
     
     public Film(Long id, String title, String description, String genre, 
                 int duration, String posterFileName, int minAge) {
@@ -24,10 +33,8 @@ public class Film {
         this.duration = duration;
         this.posterFileName = posterFileName;
         this.minAge = minAge;
-        this.sessions = new ArrayList<>();
     }
     
-    // Геттеры и сеттеры
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -49,10 +56,9 @@ public class Film {
     public int getMinAge() { return minAge; }
     public void setMinAge(int minAge) { this.minAge = minAge; }
 
-    public ArrayList<Session> getSessions() { return sessions; }
-    public void setSessions(ArrayList<Session> sessions) { this.sessions = sessions; } 
+    public List<Session> getSessions() { return sessions; }
+    public void setSessions(List<Session> sessions) { this.sessions = sessions; } 
     
-    // Метод для получения полного URL к изображению
     public String getPosterUrl() {
         return "/images/posters/" + posterFileName;
     }

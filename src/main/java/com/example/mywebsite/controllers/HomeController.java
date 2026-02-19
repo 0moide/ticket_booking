@@ -1,6 +1,7 @@
 package com.example.mywebsite.controllers;
 
 import com.example.mywebsite.entities.Film;
+import com.example.mywebsite.entities.Session;
 import com.example.mywebsite.services.FilmService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,16 +35,39 @@ public class HomeController {
     
     @GetMapping("/session/{filmId}/{sessionIndex}")
     public String seatingPage(@PathVariable Long filmId, 
-                             @PathVariable int sessionIndex,
-                             Model model) {
+                            @PathVariable int sessionIndex,
+                            Model model) {
+        System.out.println("=== DEBUG seatingPage ===");
+        System.out.println("filmId: " + filmId);
+        System.out.println("sessionIndex: " + sessionIndex);
+        
         Film film = filmService.getFilmById(filmId);
-        if (film == null || sessionIndex >= film.getSessions().size()) {
+        if (film == null) {
+            System.out.println("Film not found!");
             return "redirect:/";
         }
+        
+        System.out.println("Film: " + film.getTitle());
+        System.out.println("Sessions size: " + film.getSessions().size());
+        
+        if (sessionIndex >= film.getSessions().size()) {
+            System.out.println("Session index out of bounds");
+            return "redirect:/";
+        }
+        
+        Session session = film.getSessions().get(sessionIndex);
+        System.out.println("Session found, hall: " + session.getHallNumber());
+        System.out.println("Booking exists: " + (session.getBooking() != null));
+        
+        if (session.getBooking() != null) {
+            System.out.println("Booking rows: " + session.getBooking().getRows());
+            System.out.println("Booking seats: " + session.getBooking().getSeats().size());
+        }
+        
         model.addAttribute("film", film);
-        // ИЗМЕНЕНИЕ: используем другое имя вместо "session"
-        model.addAttribute("filmSession", film.getSessions().get(sessionIndex));
+        model.addAttribute("filmSession", session);
         model.addAttribute("sessionIndex", sessionIndex);
+        
         return "seating";
     }
 }

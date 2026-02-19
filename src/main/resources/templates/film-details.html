@@ -128,7 +128,10 @@
         }
         
         .btn-secondary:hover {
-            background: rgba(0, 180, 216, 0.1);
+            /* background: rgba(0, 180, 216, 0.1); */
+            background: transparent;
+            border: 2px solid #00b4d8;
+            color: #00b4d8;
         }
         
         .coming-soon {
@@ -183,6 +186,11 @@
     </style>
 </head>
 <body>
+    <!-- <div style="background: yellow; color: black; padding: 10px; margin: 10px;">
+        Фильм: <span th:text="${film.title}">Название</span><br/>
+        Сессий: <span th:text="${film.sessions != null ? film.sessions.size() : 'null'}">0</span><br/>
+        Сессии пусты? <span th:text="${film.sessions != null and film.sessions.isEmpty()}">true</span>
+    </div> -->
     <header class="header">
         <div class="container">
             <a href="/" class="logo">🎬 Кинотеатр CINEMA</a>
@@ -204,7 +212,6 @@
                 </div>
                 <p class="film-description" th:text="${film.description}">Описание фильма</p>
                 
-                <a href="#" class="btn">Выбрать время сеанса</a>
                 <a href="#" class="btn btn-secondary">Посмотреть трейлер</a>
                 
                 <div class="sessions-section" th:if="${film.sessions != null and !film.sessions.isEmpty()}">
