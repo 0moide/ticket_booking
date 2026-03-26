@@ -64,6 +64,8 @@ public class Booking {
         return seatsPerRow;
     }
 
+    public int getQuantitySeats() { return quantitySeats; }
+
     public long getId() { return id; }
 
     
@@ -80,5 +82,29 @@ public class Booking {
         return false;
     }
 
+    @Transactional
+    public boolean unreserveSeat(int seatId, String userKey){
+        int digitalKey = 0;
+        try{
+            digitalKey = Integer.parseInt(userKey);
+        }
+        catch (Exception e){
+            return false;
+        }
+
+        if (seatId >= 0 && seatId < seats.size()) {
+            Seat seat = seats.get(seatId);
+            if (seat.getStatus() == SeatStatus.Reserved){
+                int key = seat.getKey();
+                if(digitalKey == key){
+                    seat.setStatus(SeatStatus.Available);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void setSession(Session session) {this.session = session; }
+    
 }

@@ -306,16 +306,17 @@ public class DatabaseService {
     }
 
     @Transactional
-    public boolean reserveSeat(Long filmId, int sessionIndex, int seatNumber, String userName) {
+    public int reserveSeat(Long filmId, int sessionIndex, int seatNumber, String userName, String userEmail) {
         Film film = filmRepository.findById(filmId).orElse(null);
-        if (film == null) return false;
+        if (film == null) return 0;
         
         List<Session> sessions = film.getSessions();
-        if (sessionIndex >= sessions.size()) return false;
+        if (sessionIndex >= sessions.size()) return 0;
         Session session = sessions.get(sessionIndex);
+        int key = Integer.parseInt(CodeGenerator.generateNumericCode());
         
         Booking booking = session.getBooking();
-        if (booking == null) return false;
+        if (booking == null) return 0;
         
         Seat targetSeat = null;
         for (Seat seat : booking.getSeats()) {
@@ -324,19 +325,86 @@ public class DatabaseService {
                 break;
             }
         }
-
-        if (targetSeat == null) return false;
-
-        System.out.println("а вот и место в dbservice: " + targetSeat.getSeatNumber());
+        
+        if (targetSeat == null) return 0;
 
         if (targetSeat.getStatus() == SeatStatus.Available) {
             targetSeat.setStatus(SeatStatus.Reserved);
             targetSeat.setName(userName);
+            targetSeat.setEmail(userEmail);
             seatRepository.save(targetSeat);
-            System.out.println(targetSeat.getStatus());
-            return true;
+            
+            return key;
         }
-        return false;
+        return 0;
+    }
+
+    @Transactional
+    public int reserveMultipleSeats(Long filmId, int sessionIndex, 
+                                    List<Integer> seatNumbers, 
+                                    String userName, String userEmail) {
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return 0;
+        
+        Session session = film.getSessions().get(sessionIndex);
+        Booking booking = session.getBooking();
+        
+        List<Seat> seatsToReserve = new ArrayList<>();
+        List<String> seatsInfo = new ArrayList<>();
+        int key = Integer.parseInt(CodeGenerator.generateNumericCode());
+        
+        for (int seatNumber : seatNumbers) {
+            for (Seat seat : booking.getSeats()) {
+                if (seat.getSeatNumber() == seatNumber && seat.getStatus() == SeatStatus.Available) {
+                    seat.setStatus(SeatStatus.Reserved);
+                    seat.setName(userName);
+                    seat.setEmail(userEmail);
+                    seat.setKey(key);
+                    seatsToReserve.add(seat);
+                    seatsInfo.add(String.format("%d ряд, %d место", seat.getRow(), seat.getNumber()));
+                    break;
+                }
+            }
+        }
+        
+        if (!seatsToReserve.isEmpty()) {
+            seatRepository.saveAll(seatsToReserve);
+            return key;
+        }
+        return 0;
+    }
+
+    @Transactional
+    public String unreserveMultipleSeats(Long filmId, int sessionIndex, String key){
+        int digitalKey = 0;
+        try{
+            digitalKey = Integer.parseInt(key);
+        }
+        catch (Exception e){
+            return "";
+        }
+
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return "";
+        
+        Session session = film.getSessions().get(sessionIndex);
+        Booking booking = session.getBooking();
+        List<Seat> seatsToUnreserve = new ArrayList<>();
+        String userEmail = "";
+
+        for (Seat seat : booking.getSeats()) {
+                if (seat.getKey() == digitalKey && seat.getStatus() == SeatStatus.Reserved) {
+                    seat.setStatus(SeatStatus.Available);
+                    seatsToUnreserve.add(seat);
+
+                    userEmail = seat.getEmail();
+                }
+        }
+        if (!seatsToUnreserve.isEmpty()) {
+            seatRepository.saveAll(seatsToUnreserve);
+            return userEmail;
+        }
+        return "";
     }
     
     @Transactional
@@ -352,5 +420,49 @@ public class DatabaseService {
     
     public Film getFilmById(Long id) {
         return filmRepository.findById(id).orElse(null);
+    }
+
+    public String getSessionTime(Long filmId, int sessionId){
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return null;
+
+        Session session = film.getSessions().get(sessionId);
+        return session.getTime().toString();
+    }
+
+    public int getHallNumber(Long filmId, int sessionId){
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return -1;
+
+        Session session = film.getSessions().get(sessionId);
+        return session.getHallNumber();
+    }
+
+    public int getSeatRow(Long filmId, int sessionId, int seatNumber){
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return -1;
+
+        Session session = film.getSessions().get(sessionId);
+        List<Seat> seats = session.getBooking().getSeats();
+        for(Seat i : seats){
+            if(i.getSeatNumber() == seatNumber){
+                return i.getRow();
+            }
+        }
+        return -1;
+    }
+
+    public int getSeatNumber(Long filmId, int sessionId, int seatNumber){
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return -1;
+
+        Session session = film.getSessions().get(sessionId);
+        List<Seat> seats = session.getBooking().getSeats();
+        for(Seat i : seats){
+            if(i.getSeatNumber() == seatNumber){
+                return i.getNumber();
+            }
+        }
+        return -1;
     }
 }

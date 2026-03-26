@@ -152,6 +152,11 @@
             opacity: 0.8;
         }
         
+        .seat.reserved:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 183, 3, 0.3);
+        }
+        
         .seat.sold {
             background: linear-gradient(135deg, #e63946 0%, #c41e3a 100%);
             border: 1px solid #e63946;
@@ -188,6 +193,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            opacity: 0.8;
         }
         
         .legend-color {
@@ -196,12 +207,33 @@
             border-radius: 8px;
         }
         
-        .booking-form {
+        .booking-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .booking-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .booking-card {
             background: #1a1a2e;
             padding: 30px;
             border-radius: 12px;
-            margin: 30px 0;
             border: 1px solid #2d3047;
+        }
+        
+        .card-title {
+            color: #00b4d8;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .form-group {
@@ -245,17 +277,37 @@
             font-size: 16px;
             margin-right: 15px;
             margin-bottom: 15px;
+            position: relative;
         }
         
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: linear-gradient(135deg, #0096c7 0%, #005f8a 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
         }
         
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn.loading {
+            pointer-events: none;
+        }
+        
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            right: 12px;
+            margin-top: -8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
         }
         
         .btn-secondary {
@@ -264,8 +316,16 @@
             color: #00b4d8;
         }
         
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background: rgba(0, 180, 216, 0.1);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(135deg, #e63946 0%, #c41e3a 100%);
+        }
+        
+        .btn-cancel:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c41e3a 0%, #a0182f 100%);
         }
         
         .selected-seats-info {
@@ -276,6 +336,33 @@
             border-left: 4px solid #00b4d8;
         }
         
+        .info-message {
+            background: rgba(255, 183, 3, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffb703;
+            color: #ffb703;
+            font-size: 14px;
+        }
+        
+        .info-message.warning {
+            border-left-color: #e63946;
+            color: #e63946;
+        }
+        
+        .booking-key {
+            background: rgba(0, 180, 216, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            border: 1px dashed #00b4d8;
+            margin: 15px 0;
+            color: #90e0ef;
+        }
+        
         .footer {
             background: #1a1a2e;
             padding: 40px 0;
@@ -283,6 +370,51 @@
             border-top: 1px solid #2d3047;
             text-align: center;
             color: #6d6d8a;
+        }
+        
+        /* Индикатор загрузки */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+        
+        .loading-spinner {
+            background: #1a1a2e;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #00b4d8;
+            box-shadow: 0 0 30px rgba(0, 180, 216, 0.3);
+            min-width: 280px;
+        }
+        
+        .loading-spinner .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2d3047;
+            border-top-color: #00b4d8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .loading-spinner p {
+            color: #90e0ef;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         @media (max-width: 768px) {
@@ -337,15 +469,15 @@
         </div>
         
         <div class="legend">
-            <div class="legend-item">
+            <div class="legend-item" onclick="showAvailableOnly()">
                 <div class="legend-color" style="background: linear-gradient(135deg, #2d3047 0%, #1e1e2e 100%); border: 1px solid #4a4e69;"></div>
                 <span>Свободно</span>
             </div>
-            <div class="legend-item">
+            <div class="legend-item" onclick="showSelectedOnly()">
                 <div class="legend-color" style="background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);"></div>
                 <span>Выбрано</span>
             </div>
-            <div class="legend-item">
+            <div class="legend-item" onclick="showReservedInfo()">
                 <div class="legend-color" style="background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);"></div>
                 <span>Забронировано</span>
             </div>
@@ -359,40 +491,73 @@
             </div>
         </div>
         
-        <div class="booking-form" id="booking-form" style="display: none;">
-            <h3 style="color: #00b4d8; margin-bottom: 20px;">Оформление бронирования</h3>
-            
-            <div class="selected-seats-info" id="selected-seats-info">
-                <!-- Информация о выбранных местах будет здесь -->
+        <div class="booking-section">
+            <!-- Блок бронирования -->
+            <div class="booking-card" id="booking-form" style="display: none;">
+                <div class="card-title">
+                    <span>📝 Новое бронирование</span>
+                </div>
+                
+                <div class="selected-seats-info" id="selected-seats-info">
+                    <!-- Информация о выбранных местах будет здесь -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="userName">Ваше имя *</label>
+                    <input type="text" class="form-control" id="userName" placeholder="Введите ваше имя" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userEmail">Email (для получения ключа)</label>
+                    <input type="email" class="form-control" id="userEmail" placeholder="example@mail.com">
+                </div>
+                
+                <button class="btn" id="confirmBookingBtn" onclick="confirmBooking()">✅ Подтвердить бронирование</button>
+                <button class="btn btn-secondary" id="clearSelectionBtn" onclick="clearSelection()">✖ Очистить выбор</button>
             </div>
             
-            <div class="form-group">
-                <label for="userName">Ваше имя *</label>
-                <input type="text" class="form-control" id="userName" placeholder="Введите ваше имя" required>
+            <!-- Блок отмены бронирования -->
+            <div class="booking-card">
+                <div class="card-title">
+                    <span>❌ Отмена бронирования</span>
+                </div>
+                
+                <div class="info-message">
+                    <strong>ℹ️ Как отменить бронь:</strong><br>
+                    Введите ключ бронирования, который был отправлен на вашу почту
+                </div>
+                
+                <div class="form-group">
+                    <label for="cancelKey">Ключ бронирования *</label>
+                    <input type="text" class="form-control" id="cancelKey" 
+                           placeholder="Введите ключ бронирования">
+                </div>
+                
+                <button class="btn btn-cancel" id="cancelBookingBtn" onclick="cancelBooking()">❌ Отменить бронирование</button>
+                
+                <!-- Информация о последнем бронировании -->
+                <div id="lastBookingInfo" style="display: none;" class="booking-key">
+                    <strong>Последний ключ бронирования:</strong><br>
+                    <span id="lastBookingKey"></span>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label for="userEmail">Email (для подтверждения)</label>
-                <input type="email" class="form-control" id="userEmail" placeholder="example@mail.com">
-            </div>
-            
-            <button class="btn" onclick="confirmBooking()">✅ Подтвердить бронирование</button>
-            <button class="btn btn-secondary" onclick="clearSelection()">✖ Очистить выбор</button>
         </div>
     </main>
     
     <footer class="footer">
         <div class="container">
-            Выберите удобные места и подтвердите бронирование
+            Выберите удобные места и подтвердите бронирование<br>
+            <small style="color: #4a4e69;">Ключ бронирования будет отправлен на ваш email</small>
         </div>
     </footer>
     
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    <!-- Индикатор загрузки -->
+    <div id="loadingOverlay" style="display: none;" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingMessage">Обработка запроса...</p>
+        </div>
+    </div>
     
     <script>
         // Данные от сервера через data-атрибуты
@@ -400,6 +565,7 @@
         let sessionIndex = document.body.dataset.sessionIndex;
         let selectedSeats = new Set();
         let seatsData = null;
+        let lastBookingKey = null;
         
         console.log("Film ID from data:", filmId);
         console.log("Session Index from data:", sessionIndex);
@@ -407,6 +573,31 @@
         // Конвертируем в числа
         if (filmId) filmId = parseInt(filmId);
         if (sessionIndex) sessionIndex = parseInt(sessionIndex);
+        
+        // Функции для управления индикатором загрузки
+        function showLoading(message = 'Обработка запроса...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const messageEl = document.getElementById('loadingMessage');
+            if (messageEl) messageEl.textContent = message;
+            if (overlay) overlay.style.display = 'flex';
+            
+            // Блокируем все кнопки
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('loading');
+            });
+        }
+        
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+            
+            // Разблокируем все кнопки
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            });
+        }
         
         // Загрузка схемы зала при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
@@ -421,18 +612,22 @@
         });
         
         function loadSeatingChart() {
+            showLoading('Загрузка схемы зала...');
+            
             fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats`)
                 .then(response => response.json())
                 .then(data => {
                     console.log("Seats data from API:", data);
                     seatsData = data;
                     renderSeatingChart(data);
+                    hideLoading();
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки схемы зала:', error);
                     document.getElementById('seating-chart').innerHTML = 
                         '<div style="text-align: center; padding: 50px; color: #e63946;">' +
                         '❌ Ошибка загрузки схемы зала. Пожалуйста, обновите страницу.</div>';
+                    hideLoading();
                 });
         }
         
@@ -453,9 +648,9 @@
             // Копируем массив мест и сортируем по ряду и номеру
             const sortedSeats = [...data.seats].sort((a, b) => {
                 if (a.row !== b.row) {
-                    return a.row - b.row;  // сортировка по ряду
+                    return a.row - b.row;
                 }
-                return a.number - b.number;  // сортировка по месту в ряду
+                return a.number - b.number;
             });
             
             const rows = data.rows;
@@ -475,7 +670,6 @@
                 
                 // Для каждого места в ряду
                 for (let seat = 0; seat < seatsPerRow; seat++) {
-                    // Вычисляем индекс в отсортированном массиве
                     const seatIndex = row * seatsPerRow + seat;
                     const seatData = sortedSeats[seatIndex];
                     
@@ -498,6 +692,9 @@
                     // Добавляем обработчик только для свободных мест
                     if (seatData.status === 'Available') {
                         seatButton.onclick = () => toggleSeatSelection(seatButton);
+                    } else if (seatData.status === 'Reserved') {
+                        // Для забронированных мест показываем информацию при наведении
+                        seatButton.title = `Забронировано ${seatData.reservedBy ? 'для ' + seatData.reservedBy : ''}`;
                     }
                     
                     rowDiv.appendChild(seatButton);
@@ -520,23 +717,23 @@
         }
         
         function toggleSeatSelection(seatButton) {
-        const seatNumber = seatButton.dataset.seatNumber;
-        
-        if (!seatNumber) {
-            console.error('seatNumber не определен');
-            return;
+            const seatNumber = seatButton.dataset.seatNumber;
+            
+            if (!seatNumber) {
+                console.error('seatNumber не определен');
+                return;
+            }
+            
+            if (selectedSeats.has(seatNumber)) {
+                selectedSeats.delete(seatNumber);
+                seatButton.classList.remove('selected');
+            } else {
+                selectedSeats.add(seatNumber);
+                seatButton.classList.add('selected');
+            }
+            
+            updateBookingForm();
         }
-        
-        if (selectedSeats.has(seatNumber)) {
-            selectedSeats.delete(seatNumber);
-            seatButton.classList.remove('selected');
-        } else {
-            selectedSeats.add(seatNumber);
-            seatButton.classList.add('selected');
-        }
-        
-        updateBookingForm();
-    }
         
         function updateBookingForm() {
             const form = document.getElementById('booking-form');
@@ -548,8 +745,8 @@
                 let seatsList = [];
                 selectedSeats.forEach(seatId => {
                     const seat = seatsData.seats[seatId];
-                    if (seat) {  // проверка, что место существует
-                        seatsList.push(`${seat.row} ряд, ${seat.number} место`);
+                    if (seat) {
+                        seatsList.push(`ряд ${seat.row}, место ${seat.number}`);
                     }
                 });
                 
@@ -572,36 +769,68 @@
         }
         
         function confirmBooking() {
-        const userName = document.getElementById('userName').value.trim();
-        
-        if (selectedSeats.size === 0) {
-            alert('Пожалуйста, выберите места для бронирования');
-            return;
-        }
-        
-        if (!userName) {
-            alert('Пожалуйста, введите ваше имя');
-            return;
-        }
-        
-        const promises = Array.from(selectedSeats).map(seatNumber => {  // seatNumber, не seatId
-            return fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats/${seatNumber}/reserve`, {
+            const userName = document.getElementById('userName').value.trim();
+            const userEmail = document.getElementById('userEmail').value.trim();
+            
+            if (selectedSeats.size === 0) {
+                alert('Пожалуйста, выберите места для бронирования');
+                return;
+            }
+            
+            if (!userName) {
+                alert('Пожалуйста, введите ваше имя');
+                return;
+            }
+            
+            if (!userEmail) {
+                alert('Пожалуйста, введите ваш email для получения ключа бронирования');
+                return;
+            }
+            
+            if (!isValidEmail(userEmail)) {
+                alert('Пожалуйста, введите корректный email адрес');
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            showLoading('Оформление бронирования...');
+            
+            // Преобразуем Set в массив чисел
+            const seatNumbers = Array.from(selectedSeats).map(Number);
+            
+            fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats/reserve-multiple`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userName: userName })
+                body: JSON.stringify({ 
+                    userName: userName,
+                    userEmail: userEmail,
+                    seatNumbers: seatNumbers
+                })
             })
-            .then(response => response.json());
-        });
-        
-        Promise.all(promises)
-            .then(results => {
-                const allSuccess = results.every(r => r.success);
-                if (allSuccess) {
-                    alert('✅ Бронирование успешно оформлено!');
+            .then(response => response.json())
+            .then(result => {
+                hideLoading();
+                
+                if (result.success) {
+                    // Если сервер вернул ключ бронирования
+                    if (result.key) {
+                        lastBookingKey = result.key;
+                        document.getElementById('lastBookingKey').textContent = lastBookingKey;
+                        document.getElementById('lastBookingInfo').style.display = 'block';
+                        
+                        alert(`✅ Бронирование успешно оформлено!\n\nКлюч бронирования: ${result.key}\n\nСохраните этот ключ для отмены бронирования.`);
+                    } else {
+                        alert('✅ Бронирование успешно оформлено! Проверьте почту для получения ключа бронирования.');
+                    }
+                    
                     clearSelection();
                     loadSeatingChart();
+                    
+                    // Очищаем поля ввода
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userEmail').value = '';
                 } else {
                     alert('❌ Некоторые места уже забронированы. Пожалуйста, обновите страницу.');
                     loadSeatingChart();
@@ -609,9 +838,102 @@
             })
             .catch(error => {
                 console.error('Ошибка бронирования:', error);
-                alert('❌ Произошла ошибка при бронировании');
+                hideLoading();
+                alert('❌ Произошла ошибка при бронировании. Пожалуйста, попробуйте позже.');
             });
-    }
+        }
+        
+        function cancelBooking() {
+            const cancelKey = document.getElementById('cancelKey').value.trim();
+            
+            if (!cancelKey) {
+                alert('Пожалуйста, введите ключ бронирования');
+                return;
+            }
+            
+            if (!confirm('Вы уверены, что хотите отменить бронирование? Это действие нельзя отменить.')) {
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            showLoading('Отмена бронирования...');
+            
+            fetch(`/api/films/${filmId}/sessions/${sessionIndex}/seats/unreserve-multiple`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    key: cancelKey
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                hideLoading();
+                
+                if (result.success) {
+                    alert('✅ Бронирование успешно отменено');
+                    
+                    // Очищаем поле
+                    document.getElementById('cancelKey').value = '';
+                    
+                    // Если отменили последнее бронирование, скрываем его ключ
+                    if (lastBookingKey === cancelKey) {
+                        document.getElementById('lastBookingInfo').style.display = 'none';
+                        lastBookingKey = null;
+                    }
+                    
+                    // Обновляем схему зала
+                    loadSeatingChart();
+                } else {
+                    alert('❌ Не удалось отменить бронирование. Проверьте правильность ключа.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка отмены бронирования:', error);
+                hideLoading();
+                alert('❌ Произошла ошибка при отмене бронирования. Пожалуйста, попробуйте позже.');
+            });
+        }
+        
+        // Вспомогательные функции
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showAvailableOnly() {
+            alert('Свободные места (серые) - доступны для бронирования. Нажмите на место, чтобы выбрать его.');
+        }
+        
+        function showSelectedOnly() {
+            if (selectedSeats.size === 0) {
+                alert('Вы пока не выбрали ни одного места. Нажмите на свободное место, чтобы выбрать его.');
+            } else {
+                const seatsList = Array.from(selectedSeats).map(seatId => {
+                    const seat = seatsData?.seats[seatId];
+                    return seat ? `ряд ${seat.row}, место ${seat.number}` : seatId;
+                }).join('\n');
+                alert(`Выбранные места:\n${seatsList}`);
+            }
+        }
+        
+        function showReservedInfo() {
+            const reservedSeats = [];
+            if (seatsData && seatsData.seats) {
+                Object.values(seatsData.seats).forEach(seat => {
+                    if (seat.status === 'Reserved') {
+                        reservedSeats.push(`ряд ${seat.row}, место ${seat.number}`);
+                    }
+                });
+            }
+            
+            if (reservedSeats.length === 0) {
+                alert('На данный момент забронированных мест нет');
+            } else {
+                alert(`Забронированные места (оранжевые):\n${reservedSeats.join('\n')}`);
+            }
+        }
     </script>
 </body>
 </html>
