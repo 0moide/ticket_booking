@@ -306,13 +306,13 @@ public class DatabaseService {
     }
 
     @Transactional
-    public int reserveSeat(Long filmId, int sessionIndex, int seatNumber, String userName, String userEmail) {
+    public int reserveSeat(Long filmId, Long sessionId, int seatNumber, String userName, String userEmail) {
         Film film = filmRepository.findById(filmId).orElse(null);
         if (film == null) return 0;
         
         List<Session> sessions = film.getSessions();
-        if (sessionIndex >= sessions.size()) return 0;
-        Session session = sessions.get(sessionIndex);
+        if (sessionId >= sessions.size()) return 0;
+        Session session = getSessionById(sessionId);
         int key = Integer.parseInt(CodeGenerator.generateNumericCode());
         
         Booking booking = session.getBooking();
@@ -340,13 +340,14 @@ public class DatabaseService {
     }
 
     @Transactional
-    public int reserveMultipleSeats(Long filmId, int sessionIndex, 
+    public int reserveMultipleSeats(Long filmId, Long sessionId, 
                                     List<Integer> seatNumbers, 
                                     String userName, String userEmail) {
         Film film = filmRepository.findById(filmId).orElse(null);
         if (film == null) return 0;
         
-        Session session = film.getSessions().get(sessionIndex);
+        Session session = getSessionById(sessionId);
+        if (session == null) return 0;
         Booking booking = session.getBooking();
         
         List<Seat> seatsToReserve = new ArrayList<>();
@@ -375,7 +376,7 @@ public class DatabaseService {
     }
 
     @Transactional
-    public String unreserveMultipleSeats(Long filmId, int sessionIndex, String key){
+    public String unreserveMultipleSeats(Long sessionId, String key){
         int digitalKey = 0;
         try{
             digitalKey = Integer.parseInt(key);
@@ -384,10 +385,9 @@ public class DatabaseService {
             return "";
         }
 
-        Film film = filmRepository.findById(filmId).orElse(null);
-        if (film == null) return "";
+        Session session = getSessionById(sessionId);
+        if (session == null) return "";
         
-        Session session = film.getSessions().get(sessionIndex);
         Booking booking = session.getBooking();
         List<Seat> seatsToUnreserve = new ArrayList<>();
         String userEmail = "";
@@ -422,27 +422,21 @@ public class DatabaseService {
         return filmRepository.findById(id).orElse(null);
     }
 
-    public String getSessionTime(Long filmId, int sessionId){
-        Film film = filmRepository.findById(filmId).orElse(null);
-        if (film == null) return null;
-
-        Session session = film.getSessions().get(sessionId);
+    public String getSessionTime(Long sessionId){
+        Session session = getSessionById(sessionId);
+        if (session == null) return "";
         return session.getTime().toString();
     }
 
-    public int getHallNumber(Long filmId, int sessionId){
-        Film film = filmRepository.findById(filmId).orElse(null);
-        if (film == null) return -1;
-
-        Session session = film.getSessions().get(sessionId);
+    public int getHallNumber(Long sessionId){
+        Session session = getSessionById(sessionId);
+        if (session == null) return -1;
         return session.getHallNumber();
     }
 
-    public int getSeatRow(Long filmId, int sessionId, int seatNumber){
-        Film film = filmRepository.findById(filmId).orElse(null);
-        if (film == null) return -1;
-
-        Session session = film.getSessions().get(sessionId);
+    public int getSeatRow(Long sessionId, int seatNumber){
+        Session session = getSessionById(sessionId);
+        if (session == null) return -1;
         List<Seat> seats = session.getBooking().getSeats();
         for(Seat i : seats){
             if(i.getSeatNumber() == seatNumber){
@@ -452,11 +446,9 @@ public class DatabaseService {
         return -1;
     }
 
-    public int getSeatNumber(Long filmId, int sessionId, int seatNumber){
-        Film film = filmRepository.findById(filmId).orElse(null);
-        if (film == null) return -1;
-
-        Session session = film.getSessions().get(sessionId);
+    public int getSeatNumber(Long sessionId, int seatNumber){
+        Session session = getSessionById(sessionId);
+        if (session == null) return -1;
         List<Seat> seats = session.getBooking().getSeats();
         for(Seat i : seats){
             if(i.getSeatNumber() == seatNumber){
@@ -464,5 +456,10 @@ public class DatabaseService {
             }
         }
         return -1;
+    }
+
+    public Session getSessionById(Long sessionId){
+        Session session = sessionRepository.findById(sessionId).orElse(null);
+        return session;
     }
 }

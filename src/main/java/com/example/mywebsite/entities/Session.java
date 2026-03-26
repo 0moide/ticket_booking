@@ -48,7 +48,7 @@ public class Session {
     public int getHallNumber() { return hallNumber; }
     public void setHallNumber(int hallNumber) {this.hallNumber = hallNumber; }
 
-    public long getId() { return id; }
+    public Long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
     public Film getFilm() { return film; }
