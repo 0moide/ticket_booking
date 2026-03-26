@@ -4,7 +4,7 @@ import { filmAPI, getImageUrl } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 function FilmPage() {
-    const { id } = useParams(); // id фильма из URL
+    const { id } = useParams();
     const [film, setFilm] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -16,7 +16,6 @@ function FilmPage() {
     const loadFilm = async () => {
         try {
             setLoading(true);
-            // Получаем все фильмы и ищем нужный по id
             const response = await filmAPI.getAllFilmsWithSessions();
             const foundFilm = response.data.find(f => f.id === parseInt(id));
             

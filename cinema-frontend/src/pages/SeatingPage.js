@@ -39,7 +39,6 @@ function SeatingPage() {
                 sessionTime: data.sessionTime
             });
             
-            // Преобразуем места из объекта в массив для удобной работы
             const seatsArray = [];
             if (data.seats) {
                 if (typeof data.seats === 'object' && !Array.isArray(data.seats)) {
@@ -59,7 +58,6 @@ function SeatingPage() {
                 }
             }
             
-            // Сортируем по ряду и номеру
             seatsArray.sort((a, b) => {
                 if (a.row !== b.row) return a.row - b.row;
                 return a.number - b.number;
@@ -137,7 +135,6 @@ function SeatingPage() {
             setLoading(true);
             const seatNumbers = selectedSeats.map(s => s.seatNumber);
             
-            // Используем sessionId напрямую, без всяких индексов
             const response = await filmAPI.reserveMultipleSeats(
                 filmId, 
                 sessionId, 
