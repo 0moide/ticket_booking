@@ -1,0 +1,218 @@
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.logo-area {
+    flex-shrink: 0;
+}
+
+.filters-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Стили для фильтров в хедере */
+.header-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-search {
+    position: relative;
+    width: 250px;
+}
+
+.header-search-input {
+    width: 100%;
+    padding: 8px 30px 8px 16px;
+    background: #3A3A3A;
+    border: 1px solid #747474;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 14px;
+    height: 40px;
+    transition: all 0.2s ease;
+}
+
+.header-search-input:focus {
+    outline: none;
+    border-color: #14A76C;
+    box-shadow: 0 0 0 2px rgba(20, 167, 108, 0.2);
+}
+
+.header-search-input::placeholder {
+    color: #747474;
+    font-size: 13px;
+}
+
+.header-search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #747474;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-search-clear:hover {
+    color: #FF652F;
+}
+
+/* Кнопка фильтра */
+.header-filter-wrapper {
+    position: relative;
+}
+
+.filter-btn {
+    background: #3A3A3A;
+    border: 1px solid #747474;
+    border-radius: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    position: relative;
+    height: 40px;
+}
+
+.filter-btn:hover {
+    background: #747474;
+    border-color: #FFE400;
+}
+
+.filter-btn.active {
+    background: #14A76C;
+    border-color: #FFE400;
+}
+
+.filter-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    background: #FF652F;
+    border-radius: 50%;
+    border: 1px solid #272727;
+}
+
+/* Попап фильтра */
+.filter-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #2D2D2D;
+    border: 1px solid #747474;
+    border-radius: 12px;
+    padding: 12px;
+    min-width: 200px;
+    z-index: 1000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.filter-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #747474;
+}
+
+.filter-popup-header span {
+    color: #FFE400;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.filter-popup-reset {
+    background: none;
+    border: none;
+    color: #FF652F;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.filter-popup-reset:hover {
+    background: rgba(255, 101, 47, 0.2);
+}
+
+.filter-popup-genres {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.filter-genre-btn {
+    background: #3A3A3A;
+    border: 1px solid #747474;
+    color: #FFFFFF;
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.filter-genre-btn:hover {
+    background: #747474;
+}
+
+.filter-genre-btn.active {
+    background: #14A76C;
+    border-color: #FFE400;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filters-area {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .header-search {
+        width: 200px;
+    }
+}
+
+@media (max-width: 600px) {
+    .filters-area {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-filters {
+        justify-content: space-between;
+    }
+    
+    .header-search {
+        flex: 1;
+    }
+}
