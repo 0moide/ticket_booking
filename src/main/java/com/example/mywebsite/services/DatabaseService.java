@@ -76,7 +76,7 @@ public class DatabaseService {
         List<Session> sessions1 = new ArrayList<>();
         
         // Сеанс 15:30
-        Session session1 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 15, 30), null, 1);
+        Session session1 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 15, 30), null, 1);
         session1.setFilm(film1);
         
         Booking booking1 = new Booking(currentBookingId++, 5, 10);
@@ -94,7 +94,7 @@ public class DatabaseService {
         sessions1.add(session1);
         
         // Сеанс 17:30
-        Session session2 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 17, 30), null, 1);
+        Session session2 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 17, 30), null, 1);
         session2.setFilm(film1);
         
         Booking booking2 = new Booking(currentBookingId++, 5, 10);
@@ -111,7 +111,7 @@ public class DatabaseService {
         sessions1.add(session2);
         
         // Сеанс 19:30
-        Session session3 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 19, 30), null, 1);
+        Session session3 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 19, 30), null, 1);
         session3.setFilm(film1);
         
         Booking booking3 = new Booking(currentBookingId++, 5, 10);
@@ -135,7 +135,7 @@ public class DatabaseService {
         List<Session> sessions2 = new ArrayList<>();
         
         // Сеанс 15:30
-        Session session4 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 15, 30), null, 2);
+        Session session4 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 15, 30), null, 2);
         session4.setFilm(film2);
         
         Booking booking4 = new Booking(currentBookingId++, 5, 10);
@@ -152,7 +152,7 @@ public class DatabaseService {
         sessions2.add(session4);
         
         // Сеанс 17:30
-        Session session5 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 17, 30), null, 2);
+        Session session5 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 17, 30), null, 2);
         session5.setFilm(film2);
         
         Booking booking5 = new Booking(currentBookingId++, 5, 10);
@@ -169,7 +169,7 @@ public class DatabaseService {
         sessions2.add(session5);
         
         // Сеанс 19:30
-        Session session6 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 19, 30), null, 2);
+        Session session6 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 19, 30), null, 2);
         session6.setFilm(film2);
         
         Booking booking6 = new Booking(currentBookingId++, 5, 10);
@@ -193,7 +193,7 @@ public class DatabaseService {
         List<Session> sessions3 = new ArrayList<>();
         
         // Сеанс 9:30
-        Session session7 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 9, 30), null, 1);
+        Session session7 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 9, 30), null, 1);
         session7.setFilm(film3);
         
         Booking booking7 = new Booking(currentBookingId++, 5, 10);
@@ -210,7 +210,7 @@ public class DatabaseService {
         sessions3.add(session7);
         
         // Сеанс 11:30
-        Session session8 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 11, 30), null, 1);
+        Session session8 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 11, 30), null, 1);
         session8.setFilm(film3);
         
         Booking booking8 = new Booking(currentBookingId++, 5, 10);
@@ -227,7 +227,7 @@ public class DatabaseService {
         sessions3.add(session8);
         
         // Сеанс 13:30
-        Session session9 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 13, 30), null, 1);
+        Session session9 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 13, 30), null, 1);
         session9.setFilm(film3);
         
         Booking booking9 = new Booking(currentBookingId++, 5, 10);
@@ -251,7 +251,7 @@ public class DatabaseService {
         List<Session> sessions4 = new ArrayList<>();
         
         // Сеанс 9:30
-        Session session10 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 9, 30), null, 2);
+        Session session10 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 9, 30), null, 2);
         session10.setFilm(film4);
         
         Booking booking10 = new Booking(currentBookingId++, 5, 10);
@@ -268,7 +268,7 @@ public class DatabaseService {
         sessions4.add(session10);
         
         // Сеанс 11:30
-        Session session11 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 11, 30), null, 2);
+        Session session11 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 11, 30), null, 2);
         session11.setFilm(film4);
         
         Booking booking11 = new Booking(currentBookingId++, 5, 10);
@@ -285,7 +285,7 @@ public class DatabaseService {
         sessions4.add(session11);
         
         // Сеанс 13:30
-        Session session12 = new Session(currentSessionId++, LocalDateTime.of(2026, 2, 11, 13, 30), null, 2);
+        Session session12 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 13, 30), null, 2);
         session12.setFilm(film4);
         
         Booking booking12 = new Booking(currentBookingId++, 5, 10);
@@ -387,7 +387,7 @@ public class DatabaseService {
 
         Session session = getSessionById(sessionId);
         if (session == null) return "";
-        
+
         Booking booking = session.getBooking();
         List<Seat> seatsToUnreserve = new ArrayList<>();
         String userEmail = "";
