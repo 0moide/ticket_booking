@@ -128,7 +128,6 @@
         }
         
         .btn-secondary:hover {
-            /* background: rgba(0, 180, 216, 0.1); */
             background: transparent;
             border: 2px solid #00b4d8;
             color: #00b4d8;
@@ -171,6 +170,51 @@
             color: #00b4d8;
         }
         
+        /* Индикатор загрузки */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+        
+        .loading-spinner {
+            background: #1a1a2e;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #00b4d8;
+            box-shadow: 0 0 30px rgba(0, 180, 216, 0.3);
+            min-width: 280px;
+        }
+        
+        .loading-spinner .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2d3047;
+            border-top-color: #00b4d8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .loading-spinner p {
+            color: #90e0ef;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 768px) {
             .film-details {
                 grid-template-columns: 1fr;
@@ -186,15 +230,10 @@
     </style>
 </head>
 <body>
-    <!-- <div style="background: yellow; color: black; padding: 10px; margin: 10px;">
-        Фильм: <span th:text="${film.title}">Название</span><br/>
-        Сессий: <span th:text="${film.sessions != null ? film.sessions.size() : 'null'}">0</span><br/>
-        Сессии пусты? <span th:text="${film.sessions != null and film.sessions.isEmpty()}">true</span>
-    </div> -->
     <header class="header">
         <div class="container">
             <a href="/" class="logo">🎬 Кинотеатр CINEMA</a>
-            <a href="/" class="back-link">← Вернуться к афише</a>
+            <a href="/" class="back-link" id="backLink">← Вернуться к афише</a>
         </div>
     </header>
     
@@ -218,6 +257,7 @@
                     <h3 style="color: #00b4d8; margin-bottom: 20px;">Доступные сеансы</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
                         <div th:each="s, iterStat : ${film.sessions}" 
+                            class="session-card"
                             style="background: rgba(0, 180, 216, 0.1); padding: 20px; border-radius: 8px; 
                                     border: 1px solid #2d3047; transition: all 0.3s ease;">
                             <div style="font-size: 20px; color: #00b4d8; margin-bottom: 10px;">
@@ -228,11 +268,18 @@
                                 <div>Дата: <span th:text="${#temporals.format(s.time, 'dd.MM.yyyy')}">11.02.2026</span></div>
                             </div>
                             <a th:href="@{/session/{filmId}/{sessionIndex}(filmId=${film.id}, sessionIndex=${iterStat.index})}" 
-                            class="btn" style="width: 100%; text-align: center;">
+                               class="btn session-link" 
+                               style="width: 100%; text-align: center;">
                                 Выбрать места
                             </a>
                         </div>
                     </div>
+                </div>
+                
+                <div th:if="${film.sessions == null or film.sessions.isEmpty()}" 
+                     class="coming-soon">
+                    <h3>🎬 Скоро в прокате</h3>
+                    <p>Следите за расписанием сеансов</p>
                 </div>
             </div>
         </div>
@@ -243,5 +290,73 @@
             © 2026 Кинотеатр CINEMA. Для бронирования выберите фильм и сеанс
         </div>
     </footer>
+    
+    <!-- Индикатор загрузки -->
+    <div id="loadingOverlay" style="display: none;" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingMessage">Загрузка...</p>
+        </div>
+    </div>
+    
+    <script>
+        // Функции для управления индикатором загрузки
+        function showLoading(message = 'Загрузка...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const messageEl = document.getElementById('loadingMessage');
+            if (messageEl) messageEl.textContent = message;
+            if (overlay) overlay.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+        
+        // Добавляем обработчики для всех ссылок на сеансы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик для кнопки "Вернуться к афише"
+            const backLink = document.getElementById('backLink');
+            if (backLink) {
+                backLink.addEventListener('click', function(e) {
+                    showLoading('Возврат к афише...');
+                });
+            }
+            
+            // Обработчики для всех кнопок "Выбрать места"
+            const sessionLinks = document.querySelectorAll('.session-link');
+            sessionLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    showLoading('Загрузка схемы зала...');
+                });
+            });
+            
+            // Обработчик для кнопки "Посмотреть трейлер"
+            const trailerBtn = document.querySelector('.btn-secondary');
+            if (trailerBtn) {
+                trailerBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showLoading('Загрузка трейлера...');
+                    // Здесь можно добавить логику открытия трейлера
+                    setTimeout(() => {
+                        hideLoading();
+                        alert('Трейлер скоро будет доступен');
+                    }, 1000);
+                });
+            }
+        });
+        
+        // Скрываем индикатор, если страница загрузилась с индикатором (например, при возврате назад)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                hideLoading();
+            }
+        });
+        
+        // Если страница загружается через навигацию браузера
+        window.addEventListener('beforeunload', function() {
+            // Не показываем индикатор при обычной навигации
+        });
+    </script>
 </body>
 </html>
