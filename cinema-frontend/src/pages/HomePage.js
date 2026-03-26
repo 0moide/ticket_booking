@@ -3,7 +3,7 @@ import { filmAPI } from '../services/api';
 import FilmCard from '../components/FilmCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
+function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvailableDates }) {
     const [allFilms, setAllFilms] = useState([]);
     const [filteredFilms, setFilteredFilms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,9 +31,22 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
             }));
             setAllFilms(filmsWithDates);
             
-            // Передаём жанры в App через пропс
+            // Собираем уникальные жанры
             const uniqueGenres = [...new Set(filmsWithDates.map(film => film.genre))];
             setGenres(uniqueGenres);
+            
+            // Собираем уникальные даты, на которые есть сеансы
+            const datesSet = new Set();
+            filmsWithDates.forEach(film => {
+                film.sessions.forEach(session => {
+                    const sessionDate = new Date(session.time);
+                    sessionDate.setHours(0, 0, 0, 0);
+                    datesSet.add(sessionDate.getTime());
+                });
+            });
+            const datesArray = Array.from(datesSet).map(timestamp => new Date(timestamp));
+            datesArray.sort((a, b) => a - b);
+            setAvailableDates(datesArray);
             
             setError(null);
         } catch (err) {

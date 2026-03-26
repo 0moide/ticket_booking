@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './DateFilter.css';
 
-function DateFilter({ onDateChange, selectedDate, showSelectedText = false }) {
+function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
     const [showCalendar, setShowCalendar] = useState(false);
 
     const today = new Date();
@@ -12,19 +12,37 @@ function DateFilter({ onDateChange, selectedDate, showSelectedText = false }) {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // Проверяем, есть ли сеансы на указанную дату
+    const isDateAvailable = (date) => {
+        if (!date) return false;
+        const checkDate = new Date(date);
+        checkDate.setHours(0, 0, 0, 0);
+        return availableDates.some(availableDate => 
+            availableDate.getTime() === checkDate.getTime()
+        );
+    };
+
+    // Проверяем, доступна ли сегодняшняя дата
+    const isTodayAvailable = isDateAvailable(today);
+    const isTomorrowAvailable = isDateAvailable(tomorrow);
+
     const handleToday = () => {
-        setShowCalendar(false);
-        onDateChange(today);
+        if (isTodayAvailable) {
+            setShowCalendar(false);
+            onDateChange(today);
+        }
     };
 
     const handleTomorrow = () => {
-        setShowCalendar(false);
-        onDateChange(tomorrow);
+        if (isTomorrowAvailable) {
+            setShowCalendar(false);
+            onDateChange(tomorrow);
+        }
     };
 
     const handleDateSelect = (date) => {
         setShowCalendar(false);
-        if (date) {
+        if (date && isDateAvailable(date)) {
             const newDate = new Date(date);
             newDate.setHours(0, 0, 0, 0);
             onDateChange(newDate);
@@ -52,7 +70,11 @@ function DateFilter({ onDateChange, selectedDate, showSelectedText = false }) {
         });
     };
 
-    // Определяем активную кнопку
+    // Фильтр для календаря — доступны только дни из availableDates
+    const filterDate = (date) => {
+        return isDateAvailable(date);
+    };
+
     const isTodayActive = selectedDate && formatDate(selectedDate) === 'Сегодня';
     const isTomorrowActive = selectedDate && formatDate(selectedDate) === 'Завтра';
     const isCustomDateActive = selectedDate && !isTodayActive && !isTomorrowActive;
@@ -60,14 +82,18 @@ function DateFilter({ onDateChange, selectedDate, showSelectedText = false }) {
     return (
         <div className="date-filter">
             <button 
-                className={`date-btn ${isTodayActive ? 'active' : ''}`}
+                className={`date-btn ${isTodayActive ? 'active' : ''} ${!isTodayAvailable ? 'disabled' : ''}`}
                 onClick={handleToday}
+                disabled={!isTodayAvailable}
+                title={!isTodayAvailable ? 'Нет сеансов на сегодня' : ''}
             >
                 Сегодня
             </button>
             <button 
-                className={`date-btn ${isTomorrowActive ? 'active' : ''}`}
+                className={`date-btn ${isTomorrowActive ? 'active' : ''} ${!isTomorrowAvailable ? 'disabled' : ''}`}
                 onClick={handleTomorrow}
+                disabled={!isTomorrowAvailable}
+                title={!isTomorrowAvailable ? 'Нет сеансов на завтра' : ''}
             >
                 Завтра
             </button>
@@ -85,6 +111,7 @@ function DateFilter({ onDateChange, selectedDate, showSelectedText = false }) {
                             onChange={handleDateSelect}
                             inline
                             minDate={today}
+                            filterDate={filterDate}
                             onClickOutside={() => setShowCalendar(false)}
                         />
                     </div>

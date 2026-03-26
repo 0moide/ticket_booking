@@ -76,7 +76,7 @@ public class DatabaseService {
         List<Session> sessions1 = new ArrayList<>();
         
         // Сеанс 15:30
-        Session session1 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 15, 30), null, 1);
+        Session session1 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 27, 15, 30), null, 1);
         session1.setFilm(film1);
         
         Booking booking1 = new Booking(currentBookingId++, 5, 10);
@@ -135,7 +135,7 @@ public class DatabaseService {
         List<Session> sessions2 = new ArrayList<>();
         
         // Сеанс 15:30
-        Session session4 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 15, 30), null, 2);
+        Session session4 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 27, 15, 30), null, 2);
         session4.setFilm(film2);
         
         Booking booking4 = new Booking(currentBookingId++, 5, 10);
@@ -251,7 +251,7 @@ public class DatabaseService {
         List<Session> sessions4 = new ArrayList<>();
         
         // Сеанс 9:30
-        Session session10 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 9, 30), null, 2);
+        Session session10 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 27, 9, 30), null, 2);
         session10.setFilm(film4);
         
         Booking booking10 = new Booking(currentBookingId++, 5, 10);
@@ -268,7 +268,7 @@ public class DatabaseService {
         sessions4.add(session10);
         
         // Сеанс 11:30
-        Session session11 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 26, 11, 30), null, 2);
+        Session session11 = new Session(currentSessionId++, LocalDateTime.of(2026, 3, 27, 11, 30), null, 2);
         session11.setFilm(film4);
         
         Booking booking11 = new Booking(currentBookingId++, 5, 10);

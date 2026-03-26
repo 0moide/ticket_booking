@@ -19,6 +19,7 @@ function AppContent() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedGenre, setSelectedGenre] = useState('');
     const [genres, setGenres] = useState([]);
+    const [availableDates, setAvailableDates] = useState([]); // ← добавили
     
     return (
         <div className="app">
@@ -34,6 +35,7 @@ function AppContent() {
                             <DateFilter 
                                 onDateChange={setSelectedDate} 
                                 selectedDate={selectedDate}
+                                availableDates={availableDates}
                             />
                             <SearchAndFiltersHeader 
                                 onSearchChange={setSearchTerm}
@@ -55,6 +57,7 @@ function AppContent() {
                             searchTerm={searchTerm}
                             selectedGenre={selectedGenre}
                             setGenres={setGenres}
+                            setAvailableDates={setAvailableDates}
                         />
                     } />
                     <Route path="/film/:id" element={<FilmPage />} />
