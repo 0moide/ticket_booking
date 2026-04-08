@@ -80,31 +80,31 @@
 
 ## Структура проекта
 
-ticket_booking/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/example/mywebsite/
-│   │   │       ├── controllers/     # REST контроллеры
-│   │   │       ├── entities/        # JPA сущности
-│   │   │       ├── services/        # Бизнес-логика
-│   │   │       └── repositories/    # JPA репозитории
-│   │   └── resources/
-│   │       ├── static/              # Статические файлы (постеры)
-│   │       └── application.properties
-│   └── test/                        # Тесты
-├── cinema-frontend/
-│   ├── src/
-│   │   ├── components/              # React компоненты
-│   │   ├── pages/                   # Страницы приложения
-│   │   ├── services/                # API вызовы
-│   │   ├── App.js                   # Главный компонент
-│   │   └── App.css                  # Глобальные стили
-│   └── package.json
-├── docker-compose.yml
-├── pom.xml
-└── README.md
-
+ticket_booking/  
+├── src/  
+│   ├── main/  
+│   │   ├── java/  
+│   │   │   └── com/example/mywebsite/  
+│   │   │       ├── controllers/     # REST контроллеры  
+│   │   │       ├── entities/        # JPA сущности  
+│   │   │       ├── services/        # Бизнес-логика  
+│   │   │       └── repositories/    # JPA репозитории  
+│   │   └── resources/  
+│   │       ├── static/              # Статические файлы (постеры)  
+│   │       └── application.properties  
+│   └── test/                        # Тесты  
+├── cinema-frontend/  
+│   ├── src/  
+│   │   ├── components/              # React компоненты  
+│   │   ├── pages/                   # Страницы приложения  
+│   │   ├── services/                # API вызовы  
+│   │   ├── App.js                   # Главный компонент  
+│   │   └── App.css                  # Глобальные стили  
+│   └── package.json  
+├── docker-compose.yml  
+├── pom.xml  
+└── README.md  
+  
 ## API Endpoints
 
 Фильмы:
