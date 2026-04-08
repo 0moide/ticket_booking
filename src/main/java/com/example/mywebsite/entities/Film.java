@@ -14,7 +14,7 @@ public class Film {
     private Long id;
     private String title;
     private String description;
-    private String genre;
+    private List<String> genre;
     private int duration;
     private String posterFileName;
     private int minAge;
@@ -24,7 +24,7 @@ public class Film {
 
     protected Film() {}
     
-    public Film(Long id, String title, String description, String genre, 
+    public Film(Long id, String title, String description, List<String> genre, 
                 int duration, String posterFileName, int minAge) {
         this.id = id;
         this.title = title;
@@ -44,8 +44,8 @@ public class Film {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
+    public List<String> getGenre() { return genre; }
+    public void setGenre(List<String> genre) { this.genre = genre; }
     
     public int getDuration() { return duration; }
     public void setDuration(int duration) { this.duration = duration; }

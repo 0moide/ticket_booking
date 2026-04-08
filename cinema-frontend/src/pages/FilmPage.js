@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import { filmAPI, getImageUrl } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DateFilter from '../components/DateFilter';
 
 function FilmPage() {
     const { id } = useParams();
+    const location = useLocation();
     const [film, setFilm] = useState(null);
     const [allSessions, setAllSessions] = useState([]);
     const [filteredSessions, setFilteredSessions] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [availableDates, setAvailableDates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const getAgeClass = (minAge) => {
+        if (minAge <= 0) return 'age-0';
+        if (minAge <= 6) return 'age-6';
+        if (minAge <= 12) return 'age-12';
+        if (minAge <= 16) return 'age-16';
+        return 'age-18';
+    };
 
     useEffect(() => {
         loadFilm();
@@ -29,17 +39,40 @@ function FilmPage() {
             
             if (foundFilm) {
                 setFilm(foundFilm);
-                // Преобразуем строки времени в объекты Date
                 const sessionsWithDates = foundFilm.sessions.map(session => ({
                     ...session,
                     dateObj: new Date(session.time)
                 }));
                 setAllSessions(sessionsWithDates);
                 
-                // Устанавливаем дату по умолчанию на сегодня
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                setSelectedDate(today);
+                // Собираем уникальные даты
+                const datesSet = new Set();
+                sessionsWithDates.forEach(session => {
+                    const sessionDate = new Date(session.time);
+                    sessionDate.setHours(0, 0, 0, 0);
+                    datesSet.add(sessionDate.getTime());
+                });
+                const datesArray = Array.from(datesSet).map(timestamp => new Date(timestamp));
+                datesArray.sort((a, b) => a - b);
+                setAvailableDates(datesArray);
+                
+                // Проверяем, есть ли дата в URL
+                const urlParams = new URLSearchParams(location.search);
+                const dateParam = urlParams.get('date');
+                
+                if (dateParam) {
+                    const dateFromUrl = new Date(dateParam);
+                    dateFromUrl.setHours(0, 0, 0, 0);
+                    // Проверяем, доступна ли эта дата
+                    if (datesArray.some(d => d.getTime() === dateFromUrl.getTime())) {
+                        setSelectedDate(dateFromUrl);
+                    } else if (datesArray.length > 0) {
+                        setSelectedDate(datesArray[0]);
+                    }
+                } else if (datesArray.length > 0) {
+                    setSelectedDate(datesArray[0]);
+                }
+                
                 setError(null);
             } else {
                 setError('Фильм не найден');
@@ -64,20 +97,8 @@ function FilmPage() {
             return sessionDate.getTime() === selectedDate.getTime();
         });
         
-        // Сортируем по времени
         filtered.sort((a, b) => new Date(a.time) - new Date(b.time));
         setFilteredSessions(filtered);
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleString('ru-RU', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
     };
 
     const formatSessionTime = (dateString) => {
@@ -94,6 +115,12 @@ function FilmPage() {
 
     return (
         <div className="film-page">
+            <div className="back-to-home">
+                <Link to="/" className="back-home-btn">
+                    ← Вернуться на главную
+                </Link>
+            </div>
+            
             <div className="film-details">
                 <div className="film-poster-container">
                     <img 
@@ -105,9 +132,11 @@ function FilmPage() {
                 <div className="film-info-container">
                     <h1 className="film-title">{film.title}</h1>
                     <div className="film-meta">
-                        <span className="meta-item">{film.genre}</span>
+                        {film.genre && Array.isArray(film.genre) && film.genre.map((genre, index) => (
+                            <span key={index} className="meta-item">{genre}</span>
+                        ))}
                         <span className="meta-item">{film.duration} мин</span>
-                        <span className="meta-item age">{film.minAge}+</span>
+                        <span className={`meta-item age ${getAgeClass(film.minAge)}`}>{film.minAge}+</span>
                     </div>
                     <p className="film-description">{film.description}</p>
                     
@@ -118,6 +147,7 @@ function FilmPage() {
                             <DateFilter 
                                 onDateChange={setSelectedDate} 
                                 selectedDate={selectedDate}
+                                availableDates={availableDates}
                             />
                             
                             {filteredSessions.length > 0 ? (

@@ -24,12 +24,12 @@
 
 .date-btn:hover {
     background: #747474;
-    border-color: #FFE400;
+    border-color: #747474;
 }
 
 .date-btn.active {
-    background: #FF652F;
-    border-color: #FFE400;
+    background: #14A76C;
+    border-color: #747474;
     color: white;
 }
 
@@ -90,5 +90,17 @@
 }
 
 .react-datepicker__navigation-icon::before {
-    border-color: #FFE400;
+    border-color: #747474;
+}
+
+.date-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.date-btn.disabled:hover {
+    background: #3A3A3A;
+    border-color: #747474;
+    transform: none;
+    box-shadow: none;
 }

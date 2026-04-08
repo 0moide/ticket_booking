@@ -3,7 +3,7 @@ import { filmAPI } from '../services/api';
 import FilmCard from '../components/FilmCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
+function HomePage({ selectedDate, searchTerm, selectedGenres, genreMode, setGenres, setAvailableDates }) {
     const [allFilms, setAllFilms] = useState([]);
     const [filteredFilms, setFilteredFilms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
 
     useEffect(() => {
         filterFilms();
-    }, [allFilms, selectedDate, searchTerm, selectedGenre]);
+    }, [allFilms, selectedDate, searchTerm, selectedGenres, genreMode]);
 
     const loadFilms = async () => {
         try {
@@ -31,9 +31,31 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
             }));
             setAllFilms(filmsWithDates);
             
-            // Передаём жанры в App через пропс
-            const uniqueGenres = [...new Set(filmsWithDates.map(film => film.genre))];
-            setGenres(uniqueGenres);
+            // Собираем уникальные жанры
+            const uniqueGenres = new Set();
+            filmsWithDates.forEach(film => {
+                if (film.genre && Array.isArray(film.genre)) {
+                    film.genre.forEach(genre => {
+                        if (genre && genre.trim()) {
+                            uniqueGenres.add(genre);
+                        }
+                    });
+                }
+            });
+            setGenres(Array.from(uniqueGenres).sort());
+            
+            // Собираем уникальные даты
+            const datesSet = new Set();
+            filmsWithDates.forEach(film => {
+                film.sessions.forEach(session => {
+                    const sessionDate = new Date(session.time);
+                    sessionDate.setHours(0, 0, 0, 0);
+                    datesSet.add(sessionDate.getTime());
+                });
+            });
+            const datesArray = Array.from(datesSet).map(timestamp => new Date(timestamp));
+            datesArray.sort((a, b) => a - b);
+            setAvailableDates(datesArray);
             
             setError(null);
         } catch (err) {
@@ -47,6 +69,7 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
     const filterFilms = () => {
         let result = [...allFilms];
         
+        // Фильтр по дате
         if (selectedDate) {
             result = result.filter(film => {
                 return film.sessions.some(session => {
@@ -57,10 +80,27 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
             });
         }
         
-        if (selectedGenre) {
-            result = result.filter(film => film.genre === selectedGenre);
+        // Фильтр по жанрам (поддерживает режимы AND и OR)
+        if (selectedGenres && selectedGenres.length > 0) {
+            result = result.filter(film => {
+                if (film.genre && Array.isArray(film.genre)) {
+                    if (genreMode === 'AND') {
+                        // Режим "И" — фильм должен содержать ВСЕ выбранные жанры
+                        return selectedGenres.every(selectedGenre => 
+                            film.genre.includes(selectedGenre)
+                        );
+                    } else {
+                        // Режим "ИЛИ" — фильм должен содержать ХОТЯ БЫ ОДИН выбранный жанр
+                        return selectedGenres.some(selectedGenre => 
+                            film.genre.includes(selectedGenre)
+                        );
+                    }
+                }
+                return false;
+            });
         }
         
+        // Поиск по названию
         if (searchTerm.trim()) {
             const term = searchTerm.toLowerCase().trim();
             result = result.filter(film => 
@@ -90,12 +130,12 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres }) {
             
             {filteredFilms.length > 0 ? (
                 <>
-                    <div className="films-count">
+                    {/* <div className="films-count">
                         Найдено фильмов: {filteredFilms.length}
-                    </div>
+                    </div> */}
                     <div className="films-grid">
                         {filteredFilms.map(film => (
-                            <FilmCard key={film.id} film={film} />
+                            <FilmCard key={film.id} film={film} selectedDate={selectedDate} />
                         ))}
                     </div>
                 </>
