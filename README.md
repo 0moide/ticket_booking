@@ -104,20 +104,3 @@ ticket_booking/
 ├── docker-compose.yml  
 ├── pom.xml  
 └── README.md  
-  
-## API Endpoints
-
-Фильмы:
-- GET /api/films - получить все фильмы
-- GET /api/films/{id} - получить фильм по ID
-- GET /api/films/with-sessions - получить фильмы с сеансами
-
-Сеансы и места:
-- GET /api/films/{filmId}/sessions/{sessionId}/seats - схема зала
-- POST /api/films/{filmId}/sessions/{sessionId}/seats/reserve-multiple - бронирование мест
-- POST /api/films/{filmId}/sessions/{sessionId}/seats/unreserve-multiple - отмена бронирования
-
-## Автор
-
-Misha Baryshnikov (0moide)
-GitHub: https://github.com/0moide
