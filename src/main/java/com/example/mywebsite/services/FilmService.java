@@ -23,24 +23,36 @@ public class FilmService {
     }
     
     private void initializeFilms() {
+        ArrayList<String> genres = new ArrayList<>();
+        genres.add("Научная фантастика");
+        genres.add("Приключения");
         films.add(new Film(currentFilmId++, "Интерстеллар", 
                 "Фантастический эпос про задыхающуюся Землю, космические полеты и парадоксы времени", 
-                "Научная фантастика", 169, 
+                genres, 169, 
                 "interstellar.jpg", 16));
         
+        genres = new ArrayList<>();
+        genres.add("Биография");
+        genres.add("Драма");
         films.add(new Film(currentFilmId++, "Оппенгеймер", 
                 "История создания атомной бомбы.", 
-                "Биография, Драма", 180, 
+                genres, 180, 
                 "oppenheimer.jpg", 18));
         
+        genres = new ArrayList<>();
+        genres.add("Приключения");
+        genres.add("Боевик");
+        genres.add("Драма");
         films.add(new Film(currentFilmId++, "Человек-бензопила: история Резе", 
                 "Новые приключения Дендзи", 
-                "Боевик", 100, 
+                genres, 100, 
                 "chainsaw_man.jpg", 18));
         
+        genres = new ArrayList<>();
+        genres.add("Боевик");
         films.add(new Film(currentFilmId++, "Крепкий орешек", 
                 "Классический боевик с Брюсом Уиллисом.", 
-                "Боевик", 132, 
+                genres, 132, 
                 "default.jpg", 16));
     }
 

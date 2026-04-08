@@ -18,6 +18,13 @@
 }
 
 /* Стили для фильтров в хедере */
+.filter-genre-empty {
+    color: #747474;
+    text-align: center;
+    padding: 12px;
+    font-size: 13px;
+}
+
 .header-filters {
     display: flex;
     align-items: center;
@@ -164,11 +171,28 @@
     overflow-y: auto;
 }
 
+.filter-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #FF652F;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 1px solid #272727;
+}
+
 .filter-genre-btn {
     background: #3A3A3A;
     border: 1px solid #747474;
     color: #FFFFFF;
-    padding: 8px 12px;
+    padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;
     font-size: 13px;
@@ -183,7 +207,57 @@
 .filter-genre-btn.active {
     background: #14A76C;
     border-color: #FFE400;
+    color: white;
 }
+
+.filter-genre-checkbox {
+    display: inline-block;
+    width: 18px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Переключатель режима фильтрации */
+.filter-mode-toggle {
+    padding: 10px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #747474;
+}
+
+.filter-mode-label {
+    display: block;
+    color: #FFE400;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.filter-mode-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-mode-btn {
+    flex: 1;
+    background: #3A3A3A;
+    border: 1px solid #747474;
+    color: #FFFFFF;
+    padding: 6px 10px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.filter-mode-btn:hover {
+    background: #747474;
+}
+
+.filter-mode-btn.active {
+    background: #14A76C;
+    border-color: #FFE400;
+    color: white;
+}
+
 
 /* Responsive */
 @media (max-width: 900px) {

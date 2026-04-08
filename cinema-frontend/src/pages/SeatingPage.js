@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { filmAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -16,6 +17,7 @@ function SeatingPage() {
     });
     const [cancelKey, setCancelKey] = useState('');
     const [lastBookingKey, setLastBookingKey] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     useEffect(() => {
         loadSeatingData();
@@ -39,6 +41,7 @@ function SeatingPage() {
                 sessionTime: data.sessionTime
             });
             
+            // Преобразуем места из объекта в массив для удобной работы
             const seatsArray = [];
             if (data.seats) {
                 if (typeof data.seats === 'object' && !Array.isArray(data.seats)) {
@@ -58,6 +61,7 @@ function SeatingPage() {
                 }
             }
             
+            // Сортируем по ряду и номеру
             seatsArray.sort((a, b) => {
                 if (a.row !== b.row) return a.row - b.row;
                 return a.number - b.number;
@@ -67,6 +71,7 @@ function SeatingPage() {
             setError(null);
         } catch (err) {
             console.error('Ошибка загрузки схемы зала:', err);
+            toast.error('Не удалось загрузить схему зала');
             setError('Не удалось загрузить схему зала');
         } finally {
             setLoading(false);
@@ -74,7 +79,14 @@ function SeatingPage() {
     };
 
     const toggleSeat = (seat) => {
-        if (seat.status !== 'Available') return;
+        if (seat.status !== 'Available') {
+            if (seat.status === 'Reserved') {
+                toast('Это место уже забронировано', { icon: '🟡' });
+            } else if (seat.status === 'Sold') {
+                toast('Это место уже продано', { icon: '🔴' });
+            }
+            return;
+        }
         
         setSelectedSeats(prev => {
             if (prev.some(s => s.seatNumber === seat.seatNumber)) {
@@ -107,27 +119,23 @@ function SeatingPage() {
     };
 
     const handleBooking = async () => {
-        console.log("filmId =", filmId);
-        console.log("sessionId =", sessionId);
-        console.log("selectedSeats =", selectedSeats);
-        
         if (selectedSeats.length === 0) {
-            alert('Пожалуйста, выберите места');
+            toast.error('Пожалуйста, выберите места');
             return;
         }
         
         if (!booking.userName.trim()) {
-            alert('Введите ваше имя');
+            toast.error('Введите ваше имя');
             return;
         }
         
         if (!booking.userEmail.trim()) {
-            alert('Введите email');
+            toast.error('Введите email');
             return;
         }
         
         if (!isValidEmail(booking.userEmail)) {
-            alert('Введите корректный email адрес');
+            toast.error('Введите корректный email адрес');
             return;
         }
 
@@ -145,42 +153,44 @@ function SeatingPage() {
                 }
             );
             
-            console.log("Ответ от сервера:", response.data);
-            
             if (response.data.success) {
                 const key = response.data.key;
                 if (key) {
                     setLastBookingKey(key);
-                    alert(`✅ Бронирование успешно!\n\nКлюч бронирования: ${key}\n\nСохраните этот ключ для отмены бронирования.`);
+                    toast.success(
+                        `✅ Бронирование успешно!\n\nКлюч бронирования: ${key}\n\nСохраните этот ключ для отмены бронирования.`,
+                        { duration: 8000 }
+                    );
                 } else {
-                    alert('✅ Бронирование успешно оформлено! Проверьте почту для получения ключа.');
+                    toast.success('✅ Бронирование успешно оформлено! Проверьте почту для получения ключа.');
                 }
                 
                 setSelectedSeats([]);
                 setBooking({ userName: '', userEmail: '' });
                 loadSeatingData();
             } else {
-                alert('❌ Не удалось забронировать места. Возможно, некоторые места уже заняты.');
+                toast.error('❌ Не удалось забронировать места. Возможно, некоторые места уже заняты.');
                 loadSeatingData();
             }
         } catch (err) {
             console.error('Ошибка бронирования:', err);
-            alert('❌ Произошла ошибка при бронировании');
+            toast.error('❌ Произошла ошибка при бронировании');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCancel = async () => {
+    const handleCancelClick = () => {
         if (!cancelKey.trim()) {
-            alert('Введите ключ бронирования');
+            toast.error('Введите ключ бронирования');
             return;
         }
+        setShowConfirmModal(true);
+    };
 
-        if (!window.confirm('Вы уверены, что хотите отменить бронирование?')) {
-            return;
-        }
-
+    const handleCancelConfirm = async () => {
+        setShowConfirmModal(false);
+        
         try {
             setLoading(true);
             
@@ -189,21 +199,25 @@ function SeatingPage() {
             });
             
             if (response.data.success) {
-                alert('✅ Бронирование успешно отменено');
+                toast.success('✅ Бронирование успешно отменено');
                 setCancelKey('');
                 if (lastBookingKey === cancelKey) {
                     setLastBookingKey(null);
                 }
                 loadSeatingData();
             } else {
-                alert('❌ Не удалось отменить бронирование. Проверьте правильность ключа.');
+                toast.error('❌ Не удалось отменить бронирование. Проверьте правильность ключа.');
             }
         } catch (err) {
             console.error('Ошибка отмены:', err);
-            alert('❌ Произошла ошибка при отмене бронирования');
+            toast.error('❌ Произошла ошибка при отмене бронирования');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCancelModalClose = () => {
+        setShowConfirmModal(false);
     };
 
     const isValidEmail = (email) => {
@@ -244,6 +258,32 @@ function SeatingPage() {
 
     return (
         <div className="seating-page">
+            <div className="back-to-home">
+                <Link to={`/film/${filmId}`} className="back-home-btn">
+                    ← Назад к фильму
+                </Link>
+                <Link to="/" className="back-home-btn" style={{ marginLeft: '10px' }}>
+                    🏠 На главную
+                </Link>
+            </div>
+            {/* Модальное окно подтверждения */}
+            {showConfirmModal && (
+                <div className="confirm-modal-overlay" onClick={handleCancelModalClose}>
+                    <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Подтверждение отмены</h3>
+                        <p>Вы уверены, что хотите отменить бронирование? Это действие нельзя отменить.</p>
+                        <div className="confirm-modal-buttons">
+                            <button className="btn btn-secondary" onClick={handleCancelModalClose}>
+                                Отмена
+                            </button>
+                            <button className="btn btn-cancel" onClick={handleCancelConfirm}>
+                                Подтвердить отмену
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="session-info">
                 <h2>{sessionData.filmTitle}</h2>
                 <div className="hall-info">
@@ -343,12 +383,14 @@ function SeatingPage() {
                         />
                     </div>
                     
-                    <button className="btn" onClick={handleBooking}>
-                        ✅ Подтвердить бронирование
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => setSelectedSeats([])}>
-                        ✖ Очистить выбор
-                    </button>
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <button className="btn" onClick={handleBooking}>
+                            ✅ Подтвердить бронирование
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => setSelectedSeats([])}>
+                            ✖ Очистить выбор
+                        </button>
+                    </div>
                 </div>
 
                 <div className="booking-card">
@@ -370,7 +412,7 @@ function SeatingPage() {
                         />
                     </div>
                     
-                    <button className="btn btn-cancel" onClick={handleCancel}>
+                    <button className="btn btn-cancel" onClick={handleCancelClick}>
                         ❌ Отменить бронирование
                     </button>
                     

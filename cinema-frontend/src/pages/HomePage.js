@@ -3,7 +3,7 @@ import { filmAPI } from '../services/api';
 import FilmCard from '../components/FilmCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvailableDates }) {
+function HomePage({ selectedDate, searchTerm, selectedGenres, genreMode, setGenres, setAvailableDates }) {
     const [allFilms, setAllFilms] = useState([]);
     const [filteredFilms, setFilteredFilms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvail
 
     useEffect(() => {
         filterFilms();
-    }, [allFilms, selectedDate, searchTerm, selectedGenre]);
+    }, [allFilms, selectedDate, searchTerm, selectedGenres, genreMode]);
 
     const loadFilms = async () => {
         try {
@@ -32,10 +32,19 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvail
             setAllFilms(filmsWithDates);
             
             // Собираем уникальные жанры
-            const uniqueGenres = [...new Set(filmsWithDates.map(film => film.genre))];
-            setGenres(uniqueGenres);
+            const uniqueGenres = new Set();
+            filmsWithDates.forEach(film => {
+                if (film.genre && Array.isArray(film.genre)) {
+                    film.genre.forEach(genre => {
+                        if (genre && genre.trim()) {
+                            uniqueGenres.add(genre);
+                        }
+                    });
+                }
+            });
+            setGenres(Array.from(uniqueGenres).sort());
             
-            // Собираем уникальные даты, на которые есть сеансы
+            // Собираем уникальные даты
             const datesSet = new Set();
             filmsWithDates.forEach(film => {
                 film.sessions.forEach(session => {
@@ -60,6 +69,7 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvail
     const filterFilms = () => {
         let result = [...allFilms];
         
+        // Фильтр по дате
         if (selectedDate) {
             result = result.filter(film => {
                 return film.sessions.some(session => {
@@ -70,10 +80,27 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvail
             });
         }
         
-        if (selectedGenre) {
-            result = result.filter(film => film.genre === selectedGenre);
+        // Фильтр по жанрам (поддерживает режимы AND и OR)
+        if (selectedGenres && selectedGenres.length > 0) {
+            result = result.filter(film => {
+                if (film.genre && Array.isArray(film.genre)) {
+                    if (genreMode === 'AND') {
+                        // Режим "И" — фильм должен содержать ВСЕ выбранные жанры
+                        return selectedGenres.every(selectedGenre => 
+                            film.genre.includes(selectedGenre)
+                        );
+                    } else {
+                        // Режим "ИЛИ" — фильм должен содержать ХОТЯ БЫ ОДИН выбранный жанр
+                        return selectedGenres.some(selectedGenre => 
+                            film.genre.includes(selectedGenre)
+                        );
+                    }
+                }
+                return false;
+            });
         }
         
+        // Поиск по названию
         if (searchTerm.trim()) {
             const term = searchTerm.toLowerCase().trim();
             result = result.filter(film => 
@@ -103,12 +130,12 @@ function HomePage({ selectedDate, searchTerm, selectedGenre, setGenres, setAvail
             
             {filteredFilms.length > 0 ? (
                 <>
-                    <div className="films-count">
+                    {/* <div className="films-count">
                         Найдено фильмов: {filteredFilms.length}
-                    </div>
+                    </div> */}
                     <div className="films-grid">
                         {filteredFilms.map(film => (
-                            <FilmCard key={film.id} film={film} />
+                            <FilmCard key={film.id} film={film} selectedDate={selectedDate} />
                         ))}
                     </div>
                 </>

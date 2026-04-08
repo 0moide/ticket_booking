@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import ru from 'date-fns/locale/ru';
 import './DateFilter.css';
 
 function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
@@ -12,7 +13,6 @@ function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Проверяем, есть ли сеансы на указанную дату
     const isDateAvailable = (date) => {
         if (!date) return false;
         const checkDate = new Date(date);
@@ -22,7 +22,6 @@ function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
         );
     };
 
-    // Проверяем, доступна ли сегодняшняя дата
     const isTodayAvailable = isDateAvailable(today);
     const isTomorrowAvailable = isDateAvailable(tomorrow);
 
@@ -49,6 +48,28 @@ function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
         }
     };
 
+    // Функция для отображения текста на кнопке "Выбрать день"
+    const getPickerButtonText = () => {
+        if (!selectedDate) return 'Выбрать день';
+        
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        const tomorrowDate = new Date(todayDate);
+        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+        
+        // Если выбранная дата - сегодня или завтра, не меняем текст кнопки
+        if (selectedDate.getTime() === todayDate.getTime() ||
+            selectedDate.getTime() === tomorrowDate.getTime()) {
+            return 'Выбрать день';
+        }
+        
+        // Иначе показываем выбранную дату
+        return selectedDate.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long'
+        });
+    };
+
     const formatDate = (date) => {
         if (!date) return 'Выбрать день';
         const todayDate = new Date();
@@ -70,7 +91,6 @@ function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
         });
     };
 
-    // Фильтр для календаря — доступны только дни из availableDates
     const filterDate = (date) => {
         return isDateAvailable(date);
     };
@@ -102,7 +122,7 @@ function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
                     className={`date-btn ${isCustomDateActive ? 'active' : ''}`}
                     onClick={() => setShowCalendar(!showCalendar)}
                 >
-                    Выбрать день
+                    {getPickerButtonText()}
                 </button>
                 {showCalendar && (
                     <div className="date-picker-popup">
@@ -112,6 +132,7 @@ function DateFilter({ onDateChange, selectedDate, availableDates = [] }) {
                             inline
                             minDate={today}
                             filterDate={filterDate}
+                            locale={ru}
                             onClickOutside={() => setShowCalendar(false)}
                         />
                     </div>
